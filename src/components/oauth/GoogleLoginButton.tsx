@@ -1,6 +1,7 @@
-import { signIn } from "@/auth";
+// import { signIn } from "@/auth";
 import React from "react";
 import { Button } from "../ui/button";
+import { signIn } from "@/app/auth";
 
 const GoogleLoginButton = () => {
   return (
