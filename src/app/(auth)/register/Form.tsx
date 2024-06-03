@@ -62,7 +62,7 @@ const RegisterForm = () => {
     if (data.success) {
       toast({
         description: "Account Created Succufully",
-        position: "bottom-right",
+        // position: "bottom-right",
       });
     }
 
@@ -70,7 +70,7 @@ const RegisterForm = () => {
       // Handle error
       toast({
         description: data.error,
-        position: "bottom-right",
+        // position: "bottom-right",
       });
       return;
     }
