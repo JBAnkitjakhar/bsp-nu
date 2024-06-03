@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { signInWithCreds } from "@/actions/user.actions"
+import { string } from "zod"
 export function LoginForm() {
   const loginaction=async(formdata:FormData)=>{
     "use server"
@@ -26,7 +27,11 @@ export function LoginForm() {
     const password=formdata.get("password");
     console.log(email)
     console.log(password)
-
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      alert('Invalid input. Please enter valid email and password.');
+      return;
+    }
+    
     const response = await signInWithCreds(email,password) as any;
     // console.log(response);
     
