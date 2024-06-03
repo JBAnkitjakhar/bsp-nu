@@ -22,7 +22,7 @@ import { signInWithCreds } from "@/actions/user.actions"
 export function LoginForm() {
   const loginaction=async(formdata:FormData)=>{
     "use server"
-    const email=formdata.get("email") as String;
+    const email=formdata.get("email") ;
     const password=formdata.get("password");
     console.log(email)
     console.log(password)
