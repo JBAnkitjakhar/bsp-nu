@@ -4,7 +4,7 @@ const connectToDB = async () => {
   try {
     if(mongoose.connections&& mongoose.connections[0].readyState) return;
     const {connection}=await mongoose.connect(
-        process.env.MONGODB_URI as String,
+        process.env.MONGODB_URI as string,
         {
             dbName:"nextAuth",
         }
