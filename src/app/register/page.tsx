@@ -6,9 +6,9 @@ import { auth } from '../auth';
 const page = async () => {
   const session = await auth()
 
-  if (session) {
-    redirect("/");
-  }
+  // if (session) {
+  //   redirect("/");
+  // }
 
   return (
     <section className='container flex items-center justify-center py-12'>
