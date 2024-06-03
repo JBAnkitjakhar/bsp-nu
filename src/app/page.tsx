@@ -1,10 +1,11 @@
 import React from 'react'
 import { auth } from './auth';
+import Navbar from '@/components/Navbar';
 
 const page =async () => {
   const session = await auth();
   return (
-    <div>{session?.user?.email}</div>
+    <Navbar/>
   )
 }
 

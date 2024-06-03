@@ -1,7 +1,9 @@
 import React from 'react'
 import { redirect } from 'next/navigation';
+
+import { auth } from '../../auth';
 import RegisterForm from './Form';
-import { auth } from '../auth';
+// import { RegisterForm } from './Form';
 
 const page = async () => {
   const session = await auth()

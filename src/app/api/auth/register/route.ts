@@ -5,9 +5,11 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password,name,userType } = await request.json();
 
     const bcrypt = require("bcrypt");
+    console.log(email,password,name,userType);
+    
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     const createAccount = User
-      .create({ email: email, password: hashedPassword,name:"abc", });
+      .create({ email: email, password: hashedPassword,name:name,userType });
 
     return NextResponse.json({ success: "Account created" }, { status: 200 })
   } catch (error: any) {
