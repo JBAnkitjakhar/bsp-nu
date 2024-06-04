@@ -1,5 +1,6 @@
 
 'use server'
+import { AuthError, CredentialsSignin } from "next-auth";
 
 import { signIn, signOut } from "@/app/auth";
 import { User } from "@/lib/models/user.model";
@@ -22,18 +23,28 @@ export const signout = async () => {
 export const signInWithCreds = async (email: string, password: string, redirect: boolean = false) =>  {
     try {
         
-        const response=await signIn("credentials", {
+       await signIn("credentials", {
             email,
             password,
-            redirect
         })
-        return response;
+       
     } catch (error) {
-        return error
+      if(error instanceof AuthError){
+        console.log(Date.now(),error.cause?.err?.message);
+        
+        return {error:error.cause?.err?.message}
+        // switch(error.type){
+        //   case "CredentialsSignin":
+        //   default:
+        //     return {error:"something went wrong"}
+        // }
+      }
+      throw error
     }
+
 }
 
-import { useToast } from "@/components/ui/use-toast"
+
 
 
 

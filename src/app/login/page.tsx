@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 // import RegisterForm from "./Form";
 // import LoginForm from "./Form";
 import { auth } from "../auth";
-import { LoginForm } from "./Form";
+import LoginForm from "./Form";
+// import LoginForm from "./Form";
+// import { LoginForm } from "./Form";
 
 
 const page = async () => {

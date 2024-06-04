@@ -47,13 +47,14 @@ const RegisterForm = () => {
     },
   });
   const { toast } = useToast();
+  const [practices, setPractices] = useState("normal");
 
   const handleRegister = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    console.log({ ...values, userType: practices });
 
     const response = await fetch("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify(values),
+      body: JSON.stringify({ ...values, userType: practices }),
     });
 
     const data = await response.json();
@@ -61,7 +62,7 @@ const RegisterForm = () => {
 
     if (data.success) {
       toast({
-        description: "Account Created Succufully",
+        description: "Account Created Successfully",
         // position: "bottom-right",
       });
     }
@@ -94,7 +95,6 @@ const RegisterForm = () => {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  name="name"
                   placeholder="Enter Your Name"
                   {...form.register("name")}
                 />
@@ -103,7 +103,6 @@ const RegisterForm = () => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  name="email"
                   placeholder="Enter Your Email"
                   {...form.register("email")}
                 />
@@ -112,7 +111,6 @@ const RegisterForm = () => {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
-                  name="password"
                   placeholder="Enter the Password"
                   type="password"
                   {...form.register("password")}
@@ -120,7 +118,12 @@ const RegisterForm = () => {
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="userType">User Type</Label>
-                <Select name="userType" {...form.register("userType")}>
+                <Select
+                  value={practices}
+                  onValueChange={(value) => {
+                    setPractices(value);
+                  }}
+                >
                   <SelectTrigger id="userType">
                     <SelectValue placeholder="Select userType" />
                   </SelectTrigger>

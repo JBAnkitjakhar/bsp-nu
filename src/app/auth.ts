@@ -1,10 +1,12 @@
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import connectToDB from "@/lib/mongoose";
 import { User } from "@/lib/models/user.model";
-
+class InvalidLoginError extends CredentialsSignin {
+    cause = "Invalid identifier or password"
+  }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     session: {
@@ -22,38 +24,37 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             async authorize(credentials, req) {
                 // const client = await clientPromise;
                 // const db = client.db() as any;
-                try {
-                    await connectToDB()
+                await connectToDB()
 
-                    const user = await User.findOne({ email: credentials?.email });
-                    console.log(user);
-
-                    const bcrypt = require("bcrypt");
-
-                    const passwordCorrect = await bcrypt.compare(
-                        credentials?.password,
-                        user?.password
-                    );
-
-                    if (passwordCorrect) {
-                        return {
-                            id: user?._id,
-                            email: user?.email,
-                            name: user?.name,
-                            userType: user?.userType
-                        };
-                    }
-
-                    // console.log("credentials", credentials);
-                    return null;
-
-                } catch (error) {
-                    return {error}
+                const user = await User.findOne({ email: credentials?.email });
+                // console.log(user);
+                if(!user){
+                    throw new CredentialsSignin("invalid email or password");
+                    return null
                 }
+                
+                const bcrypt = require("bcrypt");
+                
+                const passwordCorrect = await bcrypt.compare(
+                    credentials?.password,
+                    user?.password
+                );
+                
+                if (passwordCorrect) {
+                    return user
+                    
+                }
+                
+                throw new CredentialsSignin("Invalid email or password");
+                return null
+                
 
             },
         }),
     ],
+    pages:{
+        signIn:'/login',
+    },
     //   adapter: MongoDBAdapter(clientPromise),
     callbacks: {
         jwt: async ({ user, token, trigger, session }) => {
