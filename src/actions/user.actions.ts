@@ -55,37 +55,30 @@ interface User {
   userType: string;
 }
 
-export async function registerUser(formData: FormData): Promise<any> {
+export async function registerUser(formData:User): Promise<any> {
   try {
-    // await connectToDB()
-
-    const user: User = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      userType: formData.get('userType') as string,
-    };
-    console.log(user);
+    await connectToDB()
+    console.log("register request->",formData);
+    const user= await User.findOne({email:formData.email});
+    if(user){
+      return {
+        success:false,
+        message:"user already exist with this email"
+      }
+    }
+    const newuser=new User(formData);
+    await newuser.save();
+    return {
+      success:true,
+      message:"user created successfuly"
+    }
     
-    // const newuser=await User.create(user);
-    // if(newuser)
-        // toast({
-        //     title: "Scheduled: Catch up",
-        //     description: "Friday, February 10, 2023 at 5:57 PM",
-        //   })
-    // toast.success('Registration successful!', {
-    //   duration: 3000,
-    //   position: 'top-right',
-    // });
-    return user;
+    
   } catch (error) {
-    // toast.error(`Error registering user: ${error.message}`, {
-    //   duration: 3000,
-    //   position: 'top-right',
-    // });
-    // toast({
-    //     description: "Your message has been sent.",
-    //   })
+    return{
+      success:false,
+      message:"something went wrong"
+    }
 
   } 
 }

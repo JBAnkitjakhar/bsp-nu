@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { registerUser } from "@/actions/user.actions";
+import { error } from "console";
 
 const formSchema = z
   .object({
@@ -50,31 +52,45 @@ const RegisterForm = () => {
   const [practices, setPractices] = useState("normal");
 
   const handleRegister = async (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, userType: practices });
-
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ ...values, userType: practices }),
-    });
-
-    const data = await response.json();
-    console.log(data);
-
-    if (data.success) {
+    const userdata={ ...values, userType: practices }
+    console.log(userdata);
+    await registerUser(userdata).then((data)=>{
       toast({
-        description: "Account Created Successfully",
-        // position: "bottom-right",
+        description: String(data.message),
+        
       });
-    }
-
-    if (data.error) {
-      // Handle error
+      
+    }).catch((error)=>{
       toast({
-        description: data.error,
-        // position: "bottom-right",
+        description: String(error.message),
+        
       });
-      return;
-    }
+      console.log(error);
+      
+    })
+    // const response = await fetch("/api/auth/register", {
+    //   method: "POST",
+    //   body: JSON.stringify({ ...values, userType: practices }),
+    // });
+
+    // const data = await response.json();
+    // console.log(data);
+
+    // if (data.success) {
+    //   toast({
+    //     description: "Account Created Successfully",
+    //     // position: "bottom-right",
+    //   });
+    // }
+
+    // if (data.error) {
+    //   // Handle error
+    //   toast({
+    //     description: data.error,
+    //     // position: "bottom-right",
+    //   });
+    //   return;
+    // }
 
     // Handle successful registration
   };
