@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { Parser } from 'pickleparser'; // Assuming pickleparser is a valid TypeScript module
 
-interface PickleData {
-  // Define the structure of your unpickled data here
-  // This will help with type safety and code completion
-}
+// interface PickleData {
+//   // Define the structure of your unpickled data here
+//   // This will help with type safety and code completion
+// }
 
 export const PickleToJsonConverter=()=> {
-  const [json, setJson] = useState<PickleData | null>(null);
+  const [json, setJson] = useState(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -19,7 +19,7 @@ export const PickleToJsonConverter=()=> {
           const buffer = new Uint8Array(e.target.result);
           const parser = new Parser();
           try {
-            const result = parser.parse(buffer);
+            const result:any = parser.parse(buffer);
             setJson(result);
           } catch (error) {
             console.error('Error parsing pickle data:', error);
