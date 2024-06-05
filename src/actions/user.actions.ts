@@ -56,6 +56,7 @@ interface User {
 }
 
 export async function registerUser(formData:User): Promise<any> {
+  const bcrypt = require("bcrypt");
   try {
     await connectToDB()
     console.log("register request->",formData);
@@ -66,7 +67,8 @@ export async function registerUser(formData:User): Promise<any> {
         message:"user already exist with this email"
       }
     }
-    const newuser=new User(formData);
+    const hashedPassword = await bcrypt.hash(formData.password, 10);
+    const newuser=new User({...formData,password:hashedPassword});
     await newuser.save();
     return {
       success:true,
