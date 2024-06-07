@@ -2,42 +2,11 @@
 // import Region from "@/lib/models/region.model";
 "use server"
 import { Region } from "@/lib/models/region.model";
+import { Sensor } from "@/lib/models/sensor.model";
 // import Region from "@/lib/models/region";
 import connectToDB from "@/lib/mongoose";
 
-export const Addregion=async()=>{
-    try {
-        await connectToDB();
-        // const sensor=await Sensor.create({
-        //     "Sensor_ID": "[9.226]",
-        //     "Tagnames": "Ghost Rolling",
-        //   });
-        console.log("CVR_L2");
-        
-        const region = new Region({
-            regionName: "CVR_L2",
-            Sensor_IDs:[
-                "[9.226]",
-                "[12:44]",
-                "[5:27]",
-                
-              ],
-              workingStatuses:[
-                true,
-                false,
-                true,
-              ]
-            
 
-        })
-          await region.save()
-          console.log(region);
-          
-    } catch (error) {
-        console.log(error);
-        
-    }
-}
 
 
 
@@ -46,52 +15,163 @@ const regionId = 'your-region-id';
 
 // Find the region by ID and populate the 'sensorIds' field
 export const findsensorbyRegion = async () => {
-    try {
-      await connectToDB(); // Assuming you have a separate function to connect
-  
-      const regionName = "CVR_L2";
-  
-      // Perform a lookup to join sensor and region data with filtering
-      const sensorsWithStatus = await Region.aggregate([
-        {
-          $match: { regionName }, // Filter by region name
+  try {
+    await connectToDB(); // Assuming you have a separate function to connect
+
+    const regionName = "CVR_L2";
+
+    // Perform a lookup to join sensor and region data with filtering
+    const sensorsWithStatus = await Region.aggregate([
+      {
+        $match: { regionName }, // Filter by region name
+      },
+      {
+        $lookup: {
+          from: 'sensors',
+          localField: 'Sensor_IDs', // Array of sensor IDs in the region
+          foreignField: 'Sensor_ID', // Assuming '_id' is the sensor ID field in the Sensor collection
+          as: 'sensorData',
         },
-        {
-          $lookup: {
-            from: 'sensors',
-            localField: 'Sensor_IDs', // Array of sensor IDs in the region
-            foreignField: 'Sensor_ID', // Assuming '_id' is the sensor ID field in the Sensor collection
-            as: 'sensorData',
+      },
+      {
+        $unwind: '$sensorData', // Unwind the 'sensorData' array for each sensor ID
+      },
+      // {
+      //   $match: { // Filter matched sensors based on working status (optional)
+      //     'sensorData.workingStatus': true, // Change the comparison value as needed (true/false)
+      //   },
+      // },
+      {
+        $project: {
+          sensorId: '$sensorData.Sensor_ID', // Sensor ID from the sensor document
+          sensorName: '$sensorData.Tagnames',
+          weight: '$sensorData.weight',
+          workingStatus: {
+            $arrayElemAt: ['$workingStatuses', { $indexOfArray: ['$Sensor_IDs', '$sensorData.Sensor_ID'] }],
           },
         },
-        {
-          $unwind: '$sensorData', // Unwind the 'sensorData' array for each sensor ID
-        },
-        // {
-        //   $match: { // Filter matched sensors based on working status (optional)
-        //     'sensorData.workingStatus': true, // Change the comparison value as needed (true/false)
-        //   },
-        // },
-        {
-          $project: {
-            sensorId: '$sensorData.Sensor_ID', // Sensor ID from the sensor document
-            sensorName: '$sensorData.Tagnames',
-            weight: '$sensorData.weight',
-            workingStatus: {
-              $arrayElemAt: ['$workingStatuses', {  $indexOfArray: ['$Sensor_IDs', '$sensorData.Sensor_ID']  }],
-            },
-          },
-        },
-      ]);
-  
-      if (sensorsWithStatus.length === 0) {
-        console.log(`No sensors found for region: ${regionName}`);
-      } else {
-        console.log(sensorsWithStatus);
-      }
-    } catch (error) {
-      console.error(error);
+      },
+    ]);
+
+    if (sensorsWithStatus.length === 0) {
+      console.log(`No sensors found for region: ${regionName}`);
+    } else {
+      console.log(sensorsWithStatus);
     }
-  };
-  
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+
+export const addRegionsToDatabase = async (data: any) => {
+  try {
+    // Connect to your MongoDB database
+    await connectToDB();
+
+    // Loop through each region in the data
+    for (const regionName in data) {
+      const Sensor_IDs = data[regionName]
+      // console.log(Sensor_IDs);
+
+      // Create a new Region document with sensor IDs and working statuses set to all true (modify as needed)
+      const newRegion = new Region({
+        regionName,
+        Sensor_IDs,
+        workingStatuses: Array(Sensor_IDs.length).fill(true), // Assuming all sensors are working initially (adjust)
+      });
+
+      //   Save the new region to the database
+      await newRegion.save();
+
+      console.log(`Added region: ${newRegion}`);
+    }
+
+    console.log('All regions added successfully!');
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export const getRegionsForSensorId = async () => {
+  try {
+    // Use aggregation pipeline for efficient lookup
+    const sensorId = "[9.226]"
+    const pipeline = [
+      {
+        $match: {
+          Sensor_IDs: sensorId, // Convert ID directly to ObjectId
+        },
+      },
+      {
+        $project: {
+          regionName: 1,
+          _id: 0, // Exclude _id if not required
+        },
+      },
+    ];
+
+    const regions = await Region.aggregate(pipeline);
+    console.log(regions);
+
+    return regions.map((region) => region.regionName); // Extract region names
+  } catch (error) {
+    console.error(error);
+    return []; // Return empty array on error
+  }
+}
+
+export const getRegiondata = async (regionName: string) => {
+  try {
+    await connectToDB();
+    const region = await Region.findOne({ regionName });
+    if (!region) {
+      throw new Error(`Region not found: ${regionName}`)
+    }
+    return region;
+  } catch (error) {
+    console.error(error);
+    return null;
+
+  }
+}
+
+export const getRegionsensors = async (regionName: string) => {
+  try {
+    await connectToDB();
+    const region = await Region.findOne({ regionName });
+    if (!region) {
+      throw new Error(`Region not found: ${regionName}`);
+
+    }
+    const Sensor_IDs = region["Sensor_IDs"];
+    console.log("total region sensors ",Sensor_IDs.length);
+    
+ 
+    await Sensor.find({
+      Sensor_ID: { $in: Sensor_IDs }
+    })
+      .then(sensors => {
+        console.log('Retrieved sensor data:', sensors);
+      })
+      .catch(error => {
+        console.error('Error retrieving sensor data:', error);
+      });
+
+    // for(const Sensor_IDs in)
+
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
+
+
+
+
+
+
+
 

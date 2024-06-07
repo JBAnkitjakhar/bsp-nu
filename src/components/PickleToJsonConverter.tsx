@@ -1,6 +1,9 @@
 "use client"
 import React, { useState } from 'react';
 import { Parser } from 'pickleparser'; // Assuming pickleparser is a valid TypeScript module
+import { Button } from './ui/button';
+import { addRegionsToDatabase } from '@/actions/region.action';
+import { addsensorregions } from '@/actions/sensor.action';
 
 // interface PickleData {
 //   // Define the structure of your unpickled data here
@@ -9,6 +12,13 @@ import { Parser } from 'pickleparser'; // Assuming pickleparser is a valid TypeS
 
 export const PickleToJsonConverter=()=> {
   const [json, setJson] = useState(null);
+  const prepareSensorData = (data: any[]) => {
+    return data.map((sensor) => ({
+      Sensor_ID: sensor.Sensor_ID.slice(1, -1), // Extract sensor ID (remove brackets)
+      Tagnames: sensor.Tagnames,
+      weight: 1, // Assuming weight is always 1, adjust if needed
+    }));
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -37,6 +47,18 @@ export const PickleToJsonConverter=()=> {
   return (
     <div>
       <input type="file" onChange={handleFileChange} accept=".pickle" />
+      <Button onClick={async()=>{
+            console.log("Add sensor regions button clicked")
+            if(json){
+
+              await addsensorregions(json)
+            }
+        }}>add sensorregion</Button>
+      <Button onClick={async()=>{
+            console.log("Add all region button clicked")
+            await addRegionsToDatabase(json)
+            // await Addregion()
+        }}>add all region</Button>
       {json && (
         <div>
           <h3>Converted JSON:</h3>

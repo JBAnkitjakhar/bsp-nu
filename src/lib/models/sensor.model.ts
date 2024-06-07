@@ -3,17 +3,17 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 // Define the Sensor interface
-interface ISensor extends Document {
-    Sensor_ID: string;
-    Tagnames: string;
-    weight: number;
-}
+
 
 // Create the Sensor schema
 const sensorSchema = new mongoose.Schema({
     Sensor_ID: { type: String, required: true, unique: true },
     Tagnames: { type: String, required: true },
     weight: { type: Number,  default: 1 },
+    regions: {
+        type: Object,
+        required: true,
+      },
 });
 
 // Create and export the Sensor model
