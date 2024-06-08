@@ -43,6 +43,7 @@ const ComboboxDemo = () => {
     interface regionsensors {
         _id: string;
         Tagnames: string;
+        weight:Number
     }
 
     const [regionsensors, setRegionsensors] = React.useState<regionsensors[]>([]);
@@ -74,48 +75,6 @@ const ComboboxDemo = () => {
         fun()
     }, [value])
 
-    React.useEffect(() => {
-        const fun = async () => {
-
-            await getasensor(value2).then((res) => {
-                console.log(res);
-                if (res) {
-                    const data = JSON.parse(res);
-                    console.log(data);
-                    // setSensor(data)
-                    setsensorregions(data?.regions);
-                }
-
-
-            });
-
-        }
-        fun()
-    }, [value2])
-    React.useEffect(() => {
-        // console.log(regionsensors);
-        const fun = async () => {
-
-            await getasensor(value1).then((res) => {
-                console.log(res);
-                if (res) {
-                    const data = JSON.parse(res);
-                    console.log(data);
-                    setSensor(data)
-                    setsensorregions(data?.regions);
-
-                }
-
-
-            });
-
-        }
-        fun()
-    }, [value1])
-    React.useEffect(() => {
-        console.log(selsectedregions);
-
-    }, [selsectedregions])
 
 
     return (
@@ -168,6 +127,7 @@ const ComboboxDemo = () => {
                         </Command>
                     </PopoverContent>
                 </Popover>
+
             </div>
 
 

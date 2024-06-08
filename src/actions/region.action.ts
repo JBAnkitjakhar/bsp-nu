@@ -152,7 +152,7 @@ export const getRegionsensors = async (regionName: string) => {
 
     const sensors = await Sensor.find({
       Sensor_ID: { $in: Sensor_IDs }
-    }, { Tagnames: 1 })
+    }, { Tagnames: 1 ,weight:1})
     // .then((sensors) => {
     //   console.log('Retrieved sensor data:', sensors.length);
     // })

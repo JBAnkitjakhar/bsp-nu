@@ -279,7 +279,7 @@ const ComboboxDemo = () => {
             </Popover>
             {/* <RegionTable/> */}
             <div>
-                <h1>"selected list</h1>
+                <h1>selected list</h1>
             <table className="table-auto w-full border border-gray-300 rounded-md">
             <thead>
               <tr className="bg-gray-100 text-left text-sm font-medium">
