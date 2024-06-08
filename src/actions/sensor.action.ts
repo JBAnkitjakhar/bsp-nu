@@ -204,38 +204,45 @@ export const deleteSensorFromRegions = async (Tagnames: string, regions: SensorR
 
 //modify weigh of sensors
 export interface SensorWeights {
-  [sensorId: string]: { weight: number };
+  [Tagnames: string]: { weight: number };
 }
 export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
   try {
-    await connectToDB();
-    for (const [sensorId, { weight }] of Object.entries(sensorWeights)) {
-      console.log(`Sensor ID: ${sensorId}, Weight: ${weight}`);
+    await connectToDB(); // Connect to database
+
+    for (const [Tagnames, { weight }] of Object.entries(sensorWeights)) {
+      console.log(`Sensor ID: ${Tagnames}, Weight: ${weight}`);
       try {
         await connectToDB(); // Ensure database connection is established
 
         const sensor = await Sensor.findOneAndUpdate(
-          { Sensor_ID: sensorId }, // Filter to find sensor by ID
+          { Tagnames: Tagnames }, // Filter to find sensor by ID
           { $set: { weight } }, // Update weight using $set operator
           { new: true } // Return the updated document
         );
 
         if (!sensor) {
-          console.warn(`Sensor with ID: ${sensorId} not found for update.`);
+          console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
         } else {
-          console.log(`Updated sensor weight for: ${sensorId}`, sensor);
+          console.log(`Updated sensor weight for: ${Tagnames}`, sensor);
         }
       } catch (error) {
         console.error('Error updating sensor weight:', error);
+        // Handle individual sensor update errors (optional)
       }
     }
 
-
-
+    return {
+      message: "Sensor weights updated successfully",
+    };
   } catch (error) {
     console.error('Error updating sensor weights:', error);
+    return {
+      message: "Error updating sensor weights",
+    };
   }
-}
+};
+
 
 //download json file
 export const downloadJsonfile=async ()=>{

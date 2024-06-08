@@ -19,40 +19,44 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { getRegionsensors, getallregions } from "@/actions/region.action"
-import { deleteSensorFromRegions, getallsensors, getasensor } from "@/actions/sensor.action"
+
 import { regionsname, sensorsTagnames } from "@/constants"
 
 import { useToast } from '@/components/ui/use-toast'
+import { modifyWeightOfSensors } from "@/actions/sensor.action"
 
 
 
 const ComboboxDemo = () => {
-    interface SensorRegion {
-        [regionName: string]: {
-            workingStatuse: boolean;
-            // Add other properties as needed
-        };
-    }
+   
     const { toast } = useToast()
     const [open, setOpen] = React.useState(false)
-    const [open1, setOpen1] = React.useState(false)
-    const [open2, setOpen2] = React.useState(false)
+    
     const [value, setValue] = React.useState("")
-    const [value1, setValue1] = React.useState("")
-    const [value2, setValue2] = React.useState("")
+  
     interface regionsensors {
         _id: string;
         Tagnames: string;
-        weight:Number
+        weight: Number
     }
 
     const [regionsensors, setRegionsensors] = React.useState<regionsensors[]>([]);
-    const [sensor, setSensor] = React.useState([]);
-    const [sensorregions, setsensorregions] = React.useState<SensorRegion>({});
-    const [selsectedregions, setselsectedregions] = React.useState<SensorRegion>({});
+    interface SensorWeights {
+        [Tagnames: string]: { weight: number };
+      }
+      const [sensorWeights,setsensorWeights]=React.useState<SensorWeights>({})
+    
 
     const sensors = sensorsTagnames
     const regions = regionsname
+    const options:any = [];
+for (let i = 0; i < 10; i++) {
+  options.push(
+    <option key={i} value={i + 1}>
+      {i + 1}
+    </option>
+  );
+}
 
 
     React.useEffect(() => {
@@ -74,11 +78,21 @@ const ComboboxDemo = () => {
         }
         fun()
     }, [value])
+    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>,Tagnames:string) => {
+        console.log(event.target.value,Tagnames );
+        
+        // onChange(event.target.value as string); // Type cast to string
+      };
+      React.useEffect(() => {
+        console.log(sensorWeights);
+        
+      }, [sensorWeights])
+      
 
 
 
     return (
-        <div>
+        <div className="overflow-auto rounded-md shadow">
             <div>
 
                 <h1>select by region</h1>
@@ -127,6 +141,50 @@ const ComboboxDemo = () => {
                         </Command>
                     </PopoverContent>
                 </Popover>
+                <div className="overflow-y-auto rounded-md shadow">
+                    <table className="w-full min-w-max text-left table-auto">
+                        <thead>
+                            <tr className="bg-gray-500 text-gray-100 font-semibold">
+                                <th className="px-4 py-2">Sr. No.</th>
+                                <th className="px-4 py-2">Sensor Tagname</th>
+                                <th className="px-4 py-2">Current Weight</th>
+                                <th className="px-4 py-2">New Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {regionsensors.map((sensor, index) => (
+                                <tr key={sensor._id} className="border-b border-gray-200">
+                                    <td className="px-4 py-2">{index + 1}</td>
+                                    <td className="px-4 py-2">{sensor.Tagnames}</td>
+                                    <td className="px-4 py-2">{sensor.weight.toString()}</td>
+                                    <td className="px-4 py-2">
+                                        <select onChange={(e:React.ChangeEvent<HTMLSelectElement>)=>{
+                                            console.log(e.target.value);
+                                            setsensorWeights((prev)=>({...prev,[`${sensor.Tagnames}`]:{weight: Number(e.target.value)}}))
+                                            
+                                        }}
+                                            className="border rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        >
+                                            {options}
+                                        </select>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <Button onClick={async ()=>{
+                    await modifyWeightOfSensors(sensorWeights).then((res)=>{
+                        console.log(res);
+                        if(res){
+
+                            toast({
+                                description: res.message,
+                                
+                              });
+                        }
+                    })
+                }}>Apply Changes</Button>
 
             </div>
 
