@@ -147,24 +147,41 @@ export const getRegionsensors = async (regionName: string) => {
 
     }
     const Sensor_IDs = region["Sensor_IDs"];
-    console.log("total region sensors ",Sensor_IDs.length);
-    
- 
-    await Sensor.find({
+    console.log("total region sensors ", Sensor_IDs.length);
+
+
+    const sensors = await Sensor.find({
       Sensor_ID: { $in: Sensor_IDs }
-    })
-      .then(sensors => {
-        console.log('Retrieved sensor data:', sensors);
-      })
-      .catch(error => {
-        console.error('Error retrieving sensor data:', error);
-      });
+    }, { Tagnames: 1 })
+    // .then((sensors) => {
+    //   console.log('Retrieved sensor data:', sensors.length);
+    // })
+    // .catch(error => {
+    //   console.error('Error retrieving sensor data:', error);
+    // });
+    return JSON.stringify(sensors);
 
     // for(const Sensor_IDs in)
 
+
   } catch (error) {
     console.log(error);
-    
+
+  }
+}
+export const getallregions = async () => {
+  try {
+    await connectToDB();
+    const regions = await Region.find({}, { regionName: 1, _id: 0 });
+    console.log(regions);
+    return JSON.stringify(regions)
+
+
+  } catch (error) {
+    console.log(error);
+    return null
+
+
   }
 }
 
