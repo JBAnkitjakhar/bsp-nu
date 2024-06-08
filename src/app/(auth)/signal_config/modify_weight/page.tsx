@@ -24,10 +24,13 @@ import { regionsname, sensorsTagnames } from "@/constants"
 
 import { useToast } from '@/components/ui/use-toast'
 import { modifyWeightOfSensors } from "@/actions/sensor.action"
+import PreviousMap from "postcss/lib/previous-map"
+import { redirect, useRouter } from "next/navigation"
 
 
 
 const ComboboxDemo = () => {
+    const router=useRouter()
    
     const { toast } = useToast()
     const [open, setOpen] = React.useState(false)
@@ -182,7 +185,10 @@ for (let i = 0; i < 10; i++) {
                                 description: res.message,
                                 
                               });
-                        }
+                              
+                              }
+                            router.refresh();
+                            
                     })
                 }}>Apply Changes</Button>
 

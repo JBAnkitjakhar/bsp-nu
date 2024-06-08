@@ -92,6 +92,7 @@ const ComboboxDemo = () => {
                     console.log(data);
                     // setSensor(data)
                     setsensorregions(data?.regions);
+                    setselsectedregions({});
                 }
                 
 
@@ -111,6 +112,7 @@ const ComboboxDemo = () => {
                     console.log(data);
                     setSensor(data)
                     setsensorregions(data?.regions);
+                    setselsectedregions({});
 
                 }
                 
@@ -120,10 +122,7 @@ const ComboboxDemo = () => {
         }
         fun()
     }, [value1])
-    React.useEffect(() => {
-        console.log(selsectedregions);
-        
-    }, [selsectedregions])
+  
     
 
     return (
@@ -359,6 +358,7 @@ const ComboboxDemo = () => {
                         description: res.message,
                         
                       });
+                      setselsectedregions({});
                 })
               }
             }}>Apply changes</Button>
