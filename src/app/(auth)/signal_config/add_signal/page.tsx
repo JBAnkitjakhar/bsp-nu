@@ -167,8 +167,8 @@ const ComboboxDemo = () => {
       </div>
 
       {regionsensors.length > 0 && (
-        <div>
-          <h1>Select sensor from region</h1>
+        <div className="flex flex-row items-center gap-6 m-2">
+          <h1>Select sensor from region:</h1>
           <Popover open={open2} onOpenChange={setOpen2}>
             <PopoverTrigger asChild>
               <Button
