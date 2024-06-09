@@ -5,7 +5,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='flex flex-col gap-3'>
+    <div className='flex flex-col gap-3 justify-center items-center'>
          <Button onClick={async () => {
         console.log("downloadJsonfile button clicked")
 
@@ -25,7 +25,7 @@ const page = () => {
           }
         })
 
-      }}>downloadJsonfile</Button>
+      }}>Download Json.file</Button>
       <Button onClick={async () => {
         console.log("downloadRegionwisePicklefile button clicked")
         await downloadRegionwisePicklefile().then((data)=>{
@@ -43,7 +43,7 @@ const page = () => {
 
           }
         })
-      }}>downloadRegionwisePicklefile</Button>
+      }}>Download Regionwise Pickle.file</Button>
     </div>
   )
 }

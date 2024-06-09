@@ -1,22 +1,11 @@
 import React from "react";
-import { redirect } from "next/navigation";
-// import RegisterForm from "./Form";
-// import LoginForm from "./Form";
 import { auth } from "../auth";
 import LoginForm from "./Form";
-// import LoginForm from "./Form";
-// import { LoginForm } from "./Form";
 
-
-const page = async () => {
+const Page = async () => {
   const session = await auth();
-
-  // if (session?.user) {
-  //   redirect("/");
-  // }
-
   return (
-    <section className="container flex items-center justify-center py-5">
+    <section className="flex items-center justify-center min-h-screen w-full bg-gray-800">
       <div>
         <LoginForm />
       </div>
@@ -24,4 +13,5 @@ const page = async () => {
   );
 };
 
-export default page;
+export default Page;
+
