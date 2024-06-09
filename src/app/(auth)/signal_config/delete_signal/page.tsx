@@ -117,8 +117,8 @@ const ComboboxDemo = () => {
   }, [selsectedregions]);
 
   return (
-    <div className="flex flex-col items-center justify-center ">
-      <div className="flex flex-row items-center gap-2 m-4" >
+    <div className="flex flex-col items-center justify-center h-full p-4">
+      <div className="flex flex-col items-start mb-4 gap-1 w-full max-w-3xl overflow-auto">
         <h1>Select by region: </h1>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -169,7 +169,7 @@ const ComboboxDemo = () => {
       </div>
  
       {regionsensors.length > 0 && (
-      <div className="flex flex-row items-center gap-6 m-2">
+      <div className="flex flex-col items-start mb-4 gap-1 w-full max-w-3xl overflow-auto">
           <h1>Select sensor from region:</h1>
           <Popover open={open2} onOpenChange={setOpen2}>
             <PopoverTrigger asChild>
@@ -177,7 +177,7 @@ const ComboboxDemo = () => {
                 variant="outline"
                 role="combobox"
                 aria-expanded={open2}
-                className="w-[200px] justify-between"
+                className="w-[200px] justify-between overflow-hidden"
               >
                 {value
                   ? regionsensors.find((sensor) => sensor.Tagnames === value2)
@@ -225,150 +225,151 @@ const ComboboxDemo = () => {
           </Popover>
         </div>
       )}
-  <div className="flex flex-row items-center gap-2 m-2"> 
-      <h1>Select by sensor Tagname: </h1>
-      <Popover open={open1} onOpenChange={setOpen1}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open1}
-            className="w-[200px] justify-between"
-          >
-            {value1
-              ? sensors.find((sensor) => sensor.Tagnames === value1)?.Tagnames
-              : " sensors..."}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Search sensors..." className="h-9" />
-            <CommandList>
-              <CommandEmpty>No sensors found.</CommandEmpty>
-              <CommandGroup>
-                {sensors.map((sensor, index) => (
-                  <CommandItem
-                    key={index}
-                    value={sensor.Tagnames}
-                    onSelect={(currentValue) => {
-                      setValue1(currentValue === value1 ? "" : currentValue);
-                      setOpen1(false);
-                    }}
-                  >
-                    {sensor.Tagnames}
-                    <CheckIcon
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        value === sensor.Tagnames ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <div className="flex flex-col items-start mb-4 gap-1 w-full max-w-3xl overflow-auto"> 
+        <h1>Select by sensor Tagname: </h1>
+        <Popover open={open1} onOpenChange={setOpen1}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open1}
+              className="w-[200px] justify-between overflow-hidden"
+            >
+              {value1
+                ? sensors.find((sensor) => sensor.Tagnames === value1)?.Tagnames
+                : " sensors..."}
+              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
+            <Command>
+              <CommandInput placeholder="Search sensors..." className="h-9" />
+              <CommandList>
+                <CommandEmpty>No sensors found.</CommandEmpty>
+                <CommandGroup>
+                  {sensors.map((sensor, index) => (
+                    <CommandItem
+                      key={index}
+                      value={sensor.Tagnames}
+                      onSelect={(currentValue) => {
+                        setValue1(currentValue === value1 ? "" : currentValue);
+                        setOpen1(false);
+                      }}
+                    >
+                      {sensor.Tagnames}
+                      <CheckIcon
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          value === sensor.Tagnames ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div> 
-      <div className="flex flex-row items-center gap-2 m-2">
-        <h1>Selected </h1>
-        <h1>list:</h1>
-        <table className="table-auto w-full border border-gray-300 rounded-md">
-          <thead>
-            <tr className="bg-gray-100 text-left text-sm font-medium">
-              <th className="px-4 py-2">Sr. No.</th>
-              <th className="px-4 py-2">Region Name</th>
-              <th className="px-4 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selsectedregions && // Check if regions exist before accessing
-              Object.entries(selsectedregions).map(
-                ([regionName], index) =>
-                  !selsectedregions[`${regionName}`].workingStatuse && (
-                    <tr key={regionName} className="border-b border-gray-300">
-                      <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{regionName}</td>
-                      <td className="px-4 py-2">
-                        <Button
-                          onClick={() => {
-                            console.log(regionName);
-                            setsensorregions((prevSensorRegions) => {
-                              const updatedSensorRegions = {
-                                ...prevSensorRegions,
-                              };
-                              if (updatedSensorRegions[regionName]) {
-                                updatedSensorRegions[
-                                  regionName
-                                ].workingStatuse = true;
-                              }
-                              return updatedSensorRegions;
-                            });
-                            setselsectedregions((prevSelectedRegions) => ({
-                              ...prevSelectedRegions,
-                              [regionName]: { workingStatuse: true }, // Copy region data from sensorRegions
-                            }));
-                          }}
-                        >
-                          Remove from list
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-              )}
-          </tbody>
-        </table>
+      <div className="w-full max-w-3xl overflow-auto mb-4">
+        <div className="flex flex-col items-start gap-1 w-full">
+          <h1>Selected list:</h1>
+          <table className="table-auto w-full border border-gray-800 rounded-md">
+            <thead>
+              <tr className="bg-gray-400 text-left text-sm font-medium">
+                <th className="px-4 py-2">Sr. No.</th>
+                <th className="px-4 py-2">Region Name</th>
+                <th className="px-4 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selsectedregions && // Check if regions exist before accessing
+                Object.entries(selsectedregions).map(
+                  ([regionName], index) =>
+                    !selsectedregions[`${regionName}`].workingStatuse && (
+                      <tr key={regionName} className="border-b border-gray-800">
+                        <td className="px-4 py-2">{index + 1}</td>
+                        <td className="px-4 py-2">{regionName}</td>
+                        <td className="px-4 py-2">
+                          <Button
+                            onClick={() => {
+                              console.log(regionName);
+                              setsensorregions((prevSensorRegions) => {
+                                const updatedSensorRegions = {
+                                  ...prevSensorRegions,
+                                };
+                                if (updatedSensorRegions[regionName]) {
+                                  updatedSensorRegions[
+                                    regionName
+                                  ].workingStatuse = true;
+                                }
+                                return updatedSensorRegions;
+                              });
+                              setselsectedregions((prevSelectedRegions) => ({
+                                ...prevSelectedRegions,
+                                [regionName]: { workingStatuse: true }, // Copy region data from sensorRegions
+                              }));
+                            }}
+                          >
+                            Remove from list
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                )}
+            </tbody>
+          </table>
         </div>
-        <div className="flex flex-row items-center gap-2 m-2">
-        <h1>Select </h1>
-        <h1>the</h1>
-        <h1>region:</h1>
-        <table className="table-auto w-full border border-gray-300 rounded-md">
-          <thead>
-            <tr className="bg-gray-100 text-left text-sm font-medium">
-              <th className="px-4 py-2">Sr. No.</th>
-              <th className="px-4 py-2">Region Name</th>
-              <th className="px-4 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sensorregions && // Check if regions exist before accessing
-              Object.entries(sensorregions).map(
-                ([regionName], index) =>
-                  sensorregions[`${regionName}`].workingStatuse && (
-                    <tr key={regionName} className="border-b border-gray-300">
-                      <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">{regionName}</td>
-                      <td className="px-4 py-2">
-                        <Button
-                          onClick={() => {
-                            console.log(regionName);
-                            setsensorregions((prevSensorRegions) => {
-                              const updatedSensorRegions = {
-                                ...prevSensorRegions,
-                              };
-                              if (updatedSensorRegions[regionName]) {
-                                updatedSensorRegions[
-                                  regionName
-                                ].workingStatuse = false;
-                              }
-                              return updatedSensorRegions;
-                            });
-                            setselsectedregions((prevSelectedRegions) => ({
-                              ...prevSelectedRegions,
-                              [regionName]: sensorregions[regionName], // Copy region data from sensorRegions
-                            }));
-                          }}
-                        >
-                          Remove from region
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-              )}
-          </tbody>
-        </table>
+      </div>
+      <div className="w-full max-w-3xl overflow-auto mb-4">
+        <div className="flex flex-col items-start gap-1 w-full">
+          <h1>Select the region:</h1>
+          <table className="table-auto w-full border border-gray-800 rounded-md">
+            <thead>
+              <tr className="bg-gray-400 text-left text-sm font-medium">
+                <th className="px-4 py-2">Sr. No.</th>
+                <th className="px-4 py-2">Region Name</th>
+                <th className="px-4 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sensorregions && // Check if regions exist before accessing
+                Object.entries(sensorregions).map(
+                  ([regionName], index) =>
+                    sensorregions[`${regionName}`].workingStatuse && (
+                      <tr key={regionName} className="border-b border-gray-800">
+                        <td className="px-4 py-2">{index + 1}</td>
+                        <td className="px-4 py-2">{regionName}</td>
+                        <td className="px-4 py-2">
+                          <Button
+                            onClick={() => {
+                              console.log(regionName);
+                              setsensorregions((prevSensorRegions) => {
+                                const updatedSensorRegions = {
+                                  ...prevSensorRegions,
+                                };
+                                if (updatedSensorRegions[regionName]) {
+                                  updatedSensorRegions[
+                                    regionName
+                                  ].workingStatuse = false;
+                                }
+                                return updatedSensorRegions;
+                              });
+                              setselsectedregions((prevSelectedRegions) => ({
+                                ...prevSelectedRegions,
+                                [regionName]: sensorregions[regionName], // Copy region data from sensorRegions
+                              }));
+                            }}
+                          >
+                            Remove from region
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                )}
+            </tbody>
+          </table>
+        </div>
       </div>
       <Button
         onClick={async () => {
