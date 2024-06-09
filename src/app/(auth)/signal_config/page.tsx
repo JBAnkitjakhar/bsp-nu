@@ -1,9 +1,9 @@
 import React from 'react'
 
-const page = () => {
+const SignalConfig = () => {
   return (
-    <div>page</div>
+    <div>signal config</div>
   )
 }
 
-export default page
+export default SignalConfig
