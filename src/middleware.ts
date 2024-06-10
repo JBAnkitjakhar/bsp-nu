@@ -6,13 +6,13 @@ import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
-    return NextResponse.next();
+    // return NextResponse.next();
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET!,
         // Ensure this matches the name of the secure cookie used in production
-        cookieName: process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : 'authjs.session-token',
-        salt: process.env.AUTH_SALT || 'authjs.session-token',
+       
+        salt: process.env.AUTH_SALT || '__Secure-authjs.session-token',
     });
     console.log(token);
 
