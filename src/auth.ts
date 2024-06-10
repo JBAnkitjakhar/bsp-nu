@@ -1,16 +1,14 @@
-import NextAuth, { CredentialsSignin } from "next-auth"
+import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import connectToDB from "@/lib/mongoose";
 import { User } from "@/lib/models/user.model";
-class InvalidLoginError extends CredentialsSignin {
-    cause = "Invalid identifier or password"
-  }
+import { authConfig } from "./auth.config";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     session: {
-        strategy: "jwt",
+        strategy: 'jwt',
     },
     providers: [
         GitHub,
@@ -22,46 +20,42 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 password: {},
             },
             async authorize(credentials, req) {
-                // const client = await clientPromise;
-                // const db = client.db() as any;
-                await connectToDB()
-
+                await connectToDB();
                 const user = await User.findOne({ email: credentials?.email });
-                // console.log(user);
-                if(!user){
-                    throw new CredentialsSignin("invalid email or password");
-                    return null
+                if (!user) {
+                    throw new Error("Invalid email or password");
                 }
-                
                 const bcrypt = require("bcrypt");
-                
                 const passwordCorrect = await bcrypt.compare(
                     credentials?.password,
                     user?.password
                 );
-                
                 if (passwordCorrect) {
-                    return user
-                    
+                    return user;
                 }
-                
-                throw new CredentialsSignin("Invalid email or password");
-                return null
-                
-
+                throw new Error("Invalid email or password");
             },
         }),
     ],
-    pages:{
-        signIn:'/login',
+    pages: {
+        signIn: "/login",
     },
-    //   adapter: MongoDBAdapter(clientPromise),
     callbacks: {
         jwt: async ({ user, token, trigger, session }) => {
-            if (trigger === "update") {
+            if (trigger === "update" && session?.user) {
                 return { ...token, ...session.user };
             }
-            return { ...token, ...user };
+            
+            if (user) {
+                token.userType = (user  as any).userType;
+            }
+            return token;
+        },
+        session: async ({ session, token }) => {
+            // if (token) {
+            //     session.user.userType = token.userType;
+            // }
+            return session;
         },
     },
 });

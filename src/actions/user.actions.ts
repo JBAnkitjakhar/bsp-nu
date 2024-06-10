@@ -2,7 +2,7 @@
 'use server'
 import { AuthError, CredentialsSignin } from "next-auth";
 
-import { signIn, signOut } from "@/app/auth";
+import { signIn, signOut } from "@/auth";
 import { User } from "@/lib/models/user.model";
 import connectToDB from "@/lib/mongoose";
 

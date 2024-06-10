@@ -147,6 +147,7 @@ interface SensorRegion {
 //add sensor to regions
 export const addSensorToRegions = async (Tagnames: string, regions: SensorRegion) => {
   try {
+    console.log(regions);
     await connectToDB();
     const sensor = await Sensor.findOne({ Tagnames });
     if (!sensor) {
@@ -154,7 +155,7 @@ export const addSensorToRegions = async (Tagnames: string, regions: SensorRegion
     }
     sensor.regions=regions;
     
-
+    
     await sensor.save();
     console.log(sensor);
     return{
