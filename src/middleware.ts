@@ -2,19 +2,26 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
+import { log } from 'console';
 
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // return NextResponse.next();
+    console.log("salt: ",process.env.AUTH_SALT);
+//     const rawToken = await getToken({ reqL:request, raw: true })
+//   console.log(rawToken)
+    
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET!,
         // Ensure this matches the name of the secure cookie used in production
-       
+        
         salt: process.env.AUTH_SALT || '__Secure-authjs.session-token',
-    });
-    console.log(token);
+        
+        });
+        
+        console.log("token: ",token);
 
     if (publicRoutes.includes(pathname)) {
         if(token && pathname === '/login'){
