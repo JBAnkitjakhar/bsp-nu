@@ -9,6 +9,7 @@ export async function middleware(request: NextRequest) {
 
     // Allow requests to public routes without authentication
 
+    return NextResponse.next();
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET!, // Ensure this matches the secret used in your auth configuration
@@ -19,7 +20,6 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url));
 
         }
-        return NextResponse.next();
     }
 
     if (!token) {
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    const userType = token.userType;
+    const userType = token?.userType;
 
     // Redirect admin users to /admin/register
     if (userType === 'admin') {
