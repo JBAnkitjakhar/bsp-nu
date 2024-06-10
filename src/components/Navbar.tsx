@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import SignOutButton from "./SignOutButton";
 
 const Navbar = async () => {
