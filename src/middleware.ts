@@ -6,6 +6,7 @@ import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    return NextResponse.next();
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET!,
@@ -15,7 +16,6 @@ export async function middleware(request: NextRequest) {
     });
     console.log(token);
 
-    return NextResponse.next();
     if (publicRoutes.includes(pathname)) {
         if(token && pathname === '/login'){
             return NextResponse.redirect(new URL('/', request.url));
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    const userType = token.userType;
+    const userType = token?.userType;
 
     if (userType === 'admin') {
         if (pathname !== '/admin/register') {
