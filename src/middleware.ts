@@ -14,6 +14,8 @@ export async function middleware(request: NextRequest) {
         secret: process.env.AUTH_SECRET!, // Ensure this matches the secret used in your auth configuration
         salt: process.env.AUTH_SALT || 'authjs.session-token',  // Ensure this matches the salt used for your cookies
     });
+    console.log(token);
+    
     if (publicRoutes.includes(pathname)) {
         if(token&&pathname==='/login'){
             return NextResponse.redirect(new URL('/', request.url));
