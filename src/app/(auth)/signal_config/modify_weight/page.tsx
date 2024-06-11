@@ -140,7 +140,7 @@ const ComboboxDemo = () => {
         <div className="overflow-y-auto rounded-md shadow">
           <table className="w-full min-w-max text-left table-auto">
             <thead>
-              <tr className="bg-gray-500 text-gray-100 font-semibold">
+              <tr className="bg-gray-400 text-gray-100 font-semibold">
                 <th className="px-4 py-2">Sr. No.</th>
                 <th className="px-4 py-2">Sensor Tagname</th>
                 <th className="px-4 py-2">Current Weight</th>
@@ -149,7 +149,7 @@ const ComboboxDemo = () => {
             </thead>
             <tbody>
               {regionsensors.map((sensor, index) => (
-                <tr key={sensor._id} className="border-b border-gray-200">
+                <tr key={sensor._id} className="border-b border-gray-800">
                   <td className="px-4 py-2">{index + 1}</td>
                   <td className="px-4 py-2">{sensor.Tagnames}</td>
                   <td className="px-4 py-2">{sensor.weight.toString()}</td>
