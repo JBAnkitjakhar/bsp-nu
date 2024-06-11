@@ -6,7 +6,7 @@ import { log } from 'console';
 
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
-
+    
     // return NextResponse.next();
     console.log("salt: ",process.env.AUTH_SALT);
 //     const rawToken = await getToken({ reqL:request, raw: true })
@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
         secret: process.env.AUTH_SECRET!,
         // Ensure this matches the name of the secure cookie used in production
         
-        salt: process.env.AUTH_SALT || '__Secure-authjs.session-token',
+        salt: process.env.AUTH_SALT || 'authjs.session-token',
         
         });
         
