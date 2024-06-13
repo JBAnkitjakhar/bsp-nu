@@ -13,13 +13,13 @@ export const Sidebar = () => {
   
   // const pathname=usePathname()
   return (
-    <div className="bg-gray-800 dark:bg-gray-950 h-full w-[20vw] min-w-[280px] border border-sky-500 rounded dark:border-blue-800 p-6 flex flex-col gap-6 sticky left-0 top-0 bottom-0 ">
+    <div className=" bg-[#74512D] dark:bg-gray-950 h-full w-[20vw] min-w-[280px] p-6 flex flex-col gap-6 sticky left-0 top-0 bottom-0 rounded-md">
       {
         sidebarlinks.map((link,index)=>{
           const isActive = pathname === link.route || pathname.startsWith(`${link.route}/`);
           return (
-            <Link href={link.route} key={index} ><Button variant="outline" className={cn("flex items-center w-full  justify-center gap-2",{
-              'bg-sky-500 text-white hover:bg-sky-600':isActive,
+            <Link href={link.route} key={index}  ><Button variant="outline" className={cn("flex items-center w-full hover:scale-110 justify-center gap-2",{
+              'bg-[#543310] text-white':isActive,
             })}>
       {/* <TrashIcon className="h-4 w-4" /> */}
       {link.label}
