@@ -85,7 +85,7 @@ const ComboboxDemo = () => {
   }, [sensorWeights]);
 
   return (
-    <div className="flex flex-col items-center m-4">
+    <div className="flex flex-col items-center w-full border-solid border-2 border-[#543310] rounded-md ">
       {/* <div className="overflow-auto rounded-md shadow"> */}
       <div className="flex flex-row items-center gap-2 m-2">
         <h1>Select by region: </h1>
@@ -99,7 +99,7 @@ const ComboboxDemo = () => {
             >
               {value
                 ? regions.find((region) => region.regionName === value)
-                    ?.regionName
+                  ?.regionName
                 : "regions..."}
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -135,64 +135,76 @@ const ComboboxDemo = () => {
             </Command>
           </PopoverContent>
         </Popover>
-        </div>
-        <div className="m-2">
-        <div className="overflow-y-auto rounded-md shadow">
-          <table className="w-full min-w-max text-left table-auto">
-            <thead>
-              <tr className="bg-gray-400 text-gray-100 font-semibold">
-                <th className="px-4 py-2">Sr. No.</th>
-                <th className="px-4 py-2">Sensor Tagname</th>
-                <th className="px-4 py-2">Current Weight</th>
-                <th className="px-4 py-2">New Weight</th>
+      </div>
+      <div className="max-h-[70vh]  overflow-auto">
+        <table className=" text-left table-auto w-[60vw]">
+        <thead>
+      <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0"> {/* Added sticky top-0 */}
+        <th className="px-4 py-2">Sr. No.</th>
+        <th className="px-4 py-2">Sensor Tagname</th>
+        <th className="px-4 py-2">Current Weight</th>
+        <th className="px-4 py-2">New Weight</th>
+      </tr>
+    </thead>
+          <tbody>
+            {regionsensors.map((sensor, index) => (
+              <tr key={sensor._id} className="border-b border-gray-800">
+                <td className="px-4 py-2">{index + 1}</td>
+                <td className="px-4 py-2">{sensor.Tagnames}</td>
+                <td className="px-4 py-2">{sensor.weight.toString()}</td>
+                <td className="px-4 py-2">
+                  <select
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      console.log(e.target.value);
+                      setsensorWeights((prev) => ({
+                        ...prev,
+                        [`${sensor.Tagnames}`]: {
+                          weight: Number(e.target.value),
+                        },
+                      }));
+                    }}
+                    className="border rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    {options}
+                  </select>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {regionsensors.map((sensor, index) => (
-                <tr key={sensor._id} className="border-b border-gray-800">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{sensor.Tagnames}</td>
-                  <td className="px-4 py-2">{sensor.weight.toString()}</td>
-                  <td className="px-4 py-2">
-                    <select
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                        console.log(e.target.value);
-                        setsensorWeights((prev) => ({
-                          ...prev,
-                          [`${sensor.Tagnames}`]: {
-                            weight: Number(e.target.value),
-                          },
-                        }));
-                      }}
-                      className="border rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      {options}
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex m-2 items-center justify-center"> 
-        <Button
+            ))}
+          </tbody>
+        </table>
+
+      </div>
+      <Button
+      className="bg-[#AF8F6F] hover:bg-[#543310] mt-3"
           onClick={async () => {
-            await modifyWeightOfSensors(sensorWeights).then((res) => {
+            await modifyWeightOfSensors(sensorWeights).then(async(res) => {
               console.log(res);
               if (res) {
                 toast({
                   description: res.message,
                 });
+                await getRegionsensors(value).then((res) => {
+                  // console.log(res);
+                  if (res) {
+                    const data = JSON.parse(res);
+                    console.log(data);
+                    setRegionsensors(data);
+                    setsensorWeights({});
+                  }
+                });
               }
-              router.refresh();
+              
+              // router.refresh();
+
             });
           }}
         >
           Apply Changes
         </Button>
-        </div>
-      </div>
+
+
     </div>
+
     // </div>
   );
 };

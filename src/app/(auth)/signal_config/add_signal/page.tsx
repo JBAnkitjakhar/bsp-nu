@@ -138,7 +138,7 @@ const ComboboxDemo = () => {
                       key={index}
                       value={sensor.Tagnames}
                       onSelect={(currentValue) => {
-                        setValue1(currentValue === value1 ? "" : currentValue);
+                        setValue1(currentValue === value1 ? value1 : currentValue);
                         setOpen1(false);
                       }}
                     >
@@ -146,7 +146,7 @@ const ComboboxDemo = () => {
                       <CheckIcon
                         className={cn(
                           "ml-auto h-4 w-4",
-                          value === sensor.Tagnames ? "opacity-100" : "opacity-0"
+                          value1 === sensor.Tagnames ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -187,7 +187,7 @@ const ComboboxDemo = () => {
                       key={region.regionName}
                       value={region.regionName}
                       onSelect={async (currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue);
+                        setValue(currentValue === value ? value : currentValue);
                         setOpen(false);
                       }}
                     >
@@ -266,14 +266,14 @@ const ComboboxDemo = () => {
         )}
       </div>
       <div className="flex flex-row w-full gap-4 ">
-        <div className="max-h-80 basis-1/2 overflow-auto">
+        <div className="max-h-[50vh]  basis-1/2 overflow-auto">
 
           <table className="table w-full  rounded-lg border ">
           <caption className="caption-top">
           Selected list
   </caption>
             <thead>
-              <tr className="bg-[#AF8F6F] text-left text-sm font-medium">
+              <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
                 <th className="px-4 py-2">Sr. No.</th>
                 <th className="px-4 py-2">Region Name</th>
                 <th className="px-4 py-2">Status</th>
@@ -318,14 +318,14 @@ const ComboboxDemo = () => {
             </tbody>
           </table>
         </div>
-        <div className="max-h-80 basis-1/2 overflow-auto">
+        <div className="max-h-[50vh] basis-1/2 overflow-auto">
 
           <table className="table w-full rounded-lg border ">
           <caption className="caption-top">
           Select the region
   </caption>
             <thead >
-              <tr className="bg-[#AF8F6F] text-left text-sm font-medium">
+              <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
                 <th className="px-4 py-2">Sr. No.</th>
                 <th className="px-4 py-2">Region Name</th>
                 <th className="px-4 py-2">Status</th>
