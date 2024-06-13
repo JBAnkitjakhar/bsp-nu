@@ -1,11 +1,17 @@
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import connectToDB from "@/lib/mongoose";
 import { User } from "@/lib/models/user.model";
 import { authConfig } from "./auth.config";
-
+declare module "next-auth" {
+    interface Session {
+      user: {
+        userType: string;
+      } & DefaultSession["user"];
+    }
+  }
 export const { auth, handlers, signIn, signOut } = NextAuth({
     session: {
         strategy: 'jwt',
@@ -51,12 +57,21 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             }
             return token;
         },
-        session: async ({ session, token }) => {
+        session: async ({ session, token,user }) => {
             // if (token) {
-            //     session.user.userType = token.userType;
-            // }
-            return session;
-        },
+                // }
+                    // session.user.userType = token.userType as string;
+            return {
+                ...session,
+                user: {
+                  ...session.user,
+                  userType: token.userType,
+                },
+              };
+            },
+
+            // return session;
+        
         },
         cookies: {
             sessionToken: {

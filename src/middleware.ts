@@ -3,12 +3,17 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
 import { log } from 'console';
+import { auth } from './auth';
 
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
+    // const session=await auth();
+    // console.log(session);
+    
+
     
     // return NextResponse.next();
-    console.log("salt: ",process.env.AUTH_SALT);
+    // console.log("salt: ",process.env.AUTH_SALT);
 //     const rawToken = await getToken({ reqL:request, raw: true })
 //   console.log(rawToken)
     
