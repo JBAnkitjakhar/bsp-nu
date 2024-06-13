@@ -19,7 +19,7 @@ const Navbar = async () => {
   }
 
   return (
-    <header className="sticky top-0 flex h-16 bg-[#74512D] items-center justify-between border-b bg-background px-4 md:px-6 rounded-md ">
+    <header className="sticky top-0 flex h-16 bg-[#704e2b] items-center justify-between border-b bg-background px-4 md:px-6 rounded-md ">
        <div className="flex items-center">
         <Link href="/" className="flex items-center">
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Steel_Authority_of_India_logo.svg/220px-Steel_Authority_of_India_logo.svg.png" alt="Logo" className="h-8 w-auto mr-4" />
