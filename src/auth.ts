@@ -13,9 +13,7 @@ declare module "next-auth" {
     }
   }
 export const { auth, handlers, signIn, signOut } = NextAuth({
-    session: {
-        strategy: 'jwt',
-    },
+    ...authConfig,
     providers: [
         GitHub,
         Google,

@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
 import { log } from 'console';
-import { auth } from './auth';
-
+// import { auth } from './auth';
+import { authConfig } from './auth.config';
+import NextAuth from 'next-auth';
+const { auth } = NextAuth(authConfig);
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
-    // const session=await auth();
-    // console.log(session);
+    const session = await auth();
+    // console.log(session?.user?.userType);
     
 
     
@@ -26,8 +28,6 @@ export async function middleware(request: NextRequest) {
         
         });
         
-        console.log("token: ",token);
-
     if (publicRoutes.includes(pathname)) {
         if(token && pathname === '/login'){
             return NextResponse.redirect(new URL('/', request.url));
