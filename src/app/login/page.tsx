@@ -5,7 +5,7 @@ import LoginForm from "./Form";
 const Page = async () => {
   const session = await auth();
   return (
-    <section className="flex items-center justify-center min-h-screen w-full bg-gray-800">
+    <section className="flex items-center justify-center min-h-screen w-full " style={{background:'rgb(240, 180, 180)'}}>
       <div>
         <LoginForm />
       </div>
