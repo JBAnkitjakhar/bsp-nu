@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { registerUser } from "@/actions/user.actions";
-import { error } from "console";
 
 const formSchema = z
   .object({
