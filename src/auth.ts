@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import connectToDB from "@/lib/mongoose";
 import { User } from "@/lib/models/user.model";
 import { authConfig } from "./auth.config";
+import { logger } from "./lib/logger";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     session: {
@@ -31,6 +32,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     user?.password
                 );
                 if (passwordCorrect) {
+                    logger.info("login request successfuly")
                     return user;
                 }
                 throw new Error("Invalid email or password");

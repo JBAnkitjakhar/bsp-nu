@@ -1,6 +1,7 @@
 "use server"
 
 import { ISensor } from "@/lib/interfaces/sensor";
+import { logger } from "@/lib/logger";
 import { Region } from "@/lib/models/region.model";
 import { Sensor } from "@/lib/models/sensor.model";
 import connectToDB from "@/lib/mongoose"
@@ -157,7 +158,9 @@ export const addSensorToRegions = async (Tagnames: string, regions: SensorRegion
     
     
     await sensor.save();
-    console.log(sensor);
+    // console.log(sensor);
+  logger.info(`Add regions to this ${sensor.Tagnames} sensor successfuly`)
+
     return{
       message:"Sensor added to regions successfully"
     }
@@ -188,14 +191,16 @@ export const deleteSensorFromRegions = async (Tagnames: string, regions: SensorR
     // }
     sensor.regions=regions;
     await sensor.save();
-    console.log(sensor);
+    // console.log(sensor);
+  logger.info(`delete regions from this ${sensor.Tagnames} sensor successfuly`)
+
     return {
       message: "Sensor deleted from regions successfully",
     }
 
 
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     return{
       message: "Error deleting sensor from regions",
     }
@@ -223,12 +228,14 @@ export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
         );
 
         if (!sensor) {
-          console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+          // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+          logger.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`)
         } else {
-          console.log(`Updated sensor weight for: ${Tagnames}`, sensor);
+          logger.info(`Updated sensor weight for: ${Tagnames} :${weight}`);
+          
         }
       } catch (error) {
-        console.error('Error updating sensor weight:', error);
+        logger.error('Error updating sensor weight:', error);
         // Handle individual sensor update errors (optional)
       }
     }
@@ -260,14 +267,15 @@ export const downloadJsonfile=async ()=>{
       ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
       ["weight"]: sensor.weight
     }) 
-    console.log({
-      ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
-      ["weight"]: sensor.weight
-    });
+    // console.log({
+    //   ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
+    //   ["weight"]: sensor.weight
+    // });
     
   }
 
   const jsonData = JSON.stringify(sensorObject, null, 2); // Optionally add indentation
+  logger.info(`download json file request successfully`)
   return {
     data: jsonData, // Return the stringified JSON data
     message: 'Sensor data download initiated.', // Inform user about download
@@ -300,6 +308,8 @@ export const downloadRegionwisePicklefile=async()=>{
     }
   console.log(regionMap);
   const jsonData = JSON.stringify(regionMap, null, 2); // Optionally add indentation
+  logger.info(`download regionwisepickle file request successfully`)
+
   return {
     data: jsonData, // Return the stringified JSON data
     message: 'Sensor data download initiated.', // Inform user about download
@@ -335,7 +345,7 @@ export const downloadRegionwisePicklefile=async()=>{
     
   // return JSON.stringify(sensorObject);
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     
   }
 }
