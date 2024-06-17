@@ -1,19 +1,15 @@
 // sensor.ts
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { ISensor } from '../interfaces/sensor';
 
 // Define the Sensor interface
 
 
 // Create the Sensor schema
-const sensorSchema = new mongoose.Schema({
-    Sensor_ID: { type: String, required: true, unique: true },
-    Tagnames: { type: String, required: true },
-    weight: { type: Number,  default: 1 },
-    regions: {
-        type: Object,
-        required: true,
-      },
+const sensorSchema = new Schema<ISensor>({
+  Sensor_ID: { type: String, required: true, unique: true },
+  Tagname: { type: String, required: true },
 });
 
 // Create and export the Sensor model

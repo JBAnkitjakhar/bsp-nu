@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { modifyWeightOfSensors } from "@/actions/sensor.action";
 import PreviousMap from "postcss/lib/previous-map";
 import { redirect, useRouter } from "next/navigation";
+import { ISensor } from "@/lib/interfaces/sensor";
 
 const ComboboxDemo = () => {
   const router = useRouter();
@@ -35,15 +36,19 @@ const ComboboxDemo = () => {
 
   const [value, setValue] = React.useState("");
 
-  interface regionsensors {
-    _id: string;
-    Tagnames: string;
-    weight: Number;
+   interface regionsensors  {
+    _id: string;  // or use mongoose.Types.ObjectId if you prefer
+    regionName: string;
+    weight: number;
+    workingStatus?: boolean;
+    Sensor_ID: string;
+    sensor?: ISensor;
+    id?: string;
   }
 
   const [regionsensors, setRegionsensors] = React.useState<regionsensors[]>([]);
   interface SensorWeights {
-    [Tagnames: string]: { weight: number };
+    [_id: string]: { weight: number };
   }
   const [sensorWeights, setsensorWeights] = React.useState<SensorWeights>({});
 
@@ -150,7 +155,7 @@ const ComboboxDemo = () => {
             {regionsensors.map((sensor, index) => (
               <tr key={sensor._id} className="border-b border-gray-800">
                 <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{sensor.Tagnames}</td>
+                <td className="px-4 py-2">{sensor.sensor?.Tagname}</td>
                 <td className="px-4 py-2">{sensor.weight.toString()}</td>
                 <td className="px-4 py-2">
                   <select
@@ -158,7 +163,7 @@ const ComboboxDemo = () => {
                       console.log(e.target.value);
                       setsensorWeights((prev) => ({
                         ...prev,
-                        [`${sensor.Tagnames}`]: {
+                        [`${sensor._id}`]: {
                           weight: Number(e.target.value),
                         },
                       }));
@@ -177,6 +182,8 @@ const ComboboxDemo = () => {
       <Button
       className="bg-[#AF8F6F] hover:bg-[#543310] mt-3"
           onClick={async () => {
+            console.log(sensorWeights);
+            
             await modifyWeightOfSensors(sensorWeights).then(async(res) => {
               console.log(res);
               if (res) {

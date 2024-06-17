@@ -1,23 +1,15 @@
 
 
 import mongoose, { Document, Schema } from 'mongoose';
+import { IRegion } from '../interfaces/sensor';
 
 
 
 
 // Create the Region schema
-const regionSchema = new mongoose.Schema({
-    regionName: { type: String, required: true ,unique:true},
-    Sensor_IDs:[
-        { type: String, ref: 'Sensor' }, 
-    ],
-    workingStatuses: [
-        { type: Boolean, required: true },
-        
-    ],
-});
+const regionSchema = new Schema<IRegion>({
+    regionName: { type: String, required: true, unique: true }, // Make regionName unique for efficient lookups
+  });
 
-// Create and export the Region model
-// const Region = mongoose.models.Region || mongoose.model('Region', regionSchema);
-// export default Region
+
 export const Region =  mongoose.models.Region ||  mongoose.model('Region', regionSchema);

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Parser } from 'pickleparser'; // Assuming pickleparser is a valid TypeScript module
 import { Button } from './ui/button';
 import { addRegionsToDatabase } from '@/actions/region.action';
-import { addsensorregions } from '@/actions/sensor.action';
+import { addsensortoregions } from '@/actions/sensor.action';
 
 // interface PickleData {
 //   // Define the structure of your unpickled data here
@@ -51,7 +51,7 @@ export const PickleToJsonConverter=()=> {
             console.log("Add sensor regions button clicked")
             if(json){
 
-              await addsensorregions(json)
+              await addsensortoregions(json)
             }
         }}>add sensorregion</Button>
       <Button onClick={async()=>{
@@ -65,6 +65,7 @@ export const PickleToJsonConverter=()=> {
           <pre>{JSON.stringify(json, null, 2)}</pre>
         </div>
       )}
+      
     </div>
   );
 }

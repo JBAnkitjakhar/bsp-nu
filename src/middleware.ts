@@ -3,10 +3,12 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
 import { log } from 'console';
+// import { loadSensors } from './actions/sensor.action';
+
 
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
-    
+    // loadSensors().catch(err => console.error('Failed to load sensors on startup:', err));
     // return NextResponse.next();
     console.log("salt: ",process.env.AUTH_SALT);
 //     const rawToken = await getToken({ reqL:request, raw: true })
