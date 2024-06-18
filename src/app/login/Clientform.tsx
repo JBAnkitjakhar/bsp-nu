@@ -1,88 +1,82 @@
-"use client"
-import { signInWithCreds } from '@/actions/user.actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useToast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
-
-import React from 'react'
-import { date } from 'zod'
+"use client";
+import { signInWithCreds } from "@/actions/user.actions";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import {
+  EmailOutlined,
+  LockOutlined,
+} from "@mui/icons-material";
+import React from "react";
+ 
 
 const Clientform = () => {
-    const {toast}=useToast()
-    const router=useRouter()
+  const { toast } = useToast();
+  const router = useRouter();
   return (
-    <form action={async(formdata)=>{
-        const email=formdata.get("email") as string
-        const password=formdata.get("password") as string
-        console.log(email);
-        if(!email|| !password){
-            toast({
-                description: "please provide all fields",
-                
-              });
-            return;
-        }
-        await signInWithCreds(email,password).then((data)=>{
-          if(data?.error){
-            toast({
-              description: String(data.error),
-              
-            });
-            
-          }
-          else{
-            toast({
-              description: "Login Successfully",
-              
-            });
-            router.refresh()
-            router.push("/")
-          }
+    <div className="w-full h-lvh flex flex-row items-center justify-center">
+      <div className="w-1/3 py-7 px-4 max-sm:w-5/6 max-lg:w-2/3 max-xl:w-1/2 flex flex-col 
+      items-center justify-center gap-6 bg-white rounded-3xl">
+
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Steel_Authority_of_India_logo.svg/220px-Steel_Authority_of_India_logo.svg.png" alt="logo" className="w-52 h-auto" />
           
-        })
-        // const error=await signInWithCreds(email,password)
-        // if(!error){
-        //     toast({
-        //         description: "Login Successfully",
-                
-        //       });
-        //       router.refresh()
-        // }
-        // else{
-        //     toast({
-        //         description: String(error),
-                
-        //       });
-        // }
-
-    }}>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  name="email"
-                  placeholder="Enter Your Email"
-                  
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  name="password"
-                  placeholder="Enter the Password"
-                  type="password"
-                 
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Button type="submit">Login</Button>
-              </div>
-              
+          <p className="text-bold">BHILAI STEEL PLANT</p>
+        <form className="flex flex-col items-center gap-5"
+          action={async (formdata) => {
+            const email = formdata.get("email") as string;
+            const password = formdata.get("password") as string;
+            console.log(email);
+            if (!email || !password) {
+              toast({
+                description: "please provide all fields",
+              });
+              return;
+            }
+            await signInWithCreds(email, password).then((data) => {
+              if (data?.error) {
+                toast({
+                  description: String(data.error),
+                });
+              } else {
+                toast({
+                  description: "Login Successfully",
+                });
+                router.refresh();
+                router.push("/");
+              }
+            });
+          }}
+        >
+          <div>
+            <div className="flex items-center justify-between px-5 py-3 rounded-2xl cursor-pointer shadow-2xl">
+              <input
+                name="email"
+                placeholder="Enter Your Email"
+                className="w-[300px] max-sm:w-full bg-transparent outline-none"
+              />
+              <EmailOutlined sx={{ color: "#737373" }} />
             </div>
-          </form>
-  )
-}
+          </div>
 
-export default Clientform
+          <div>
+            <div className="flex items-center justify-between px-5 py-3 rounded-2xl cursor-pointer shadow-2xl">
+              <input
+                name="password"
+                placeholder=" Password"
+           type="password"
+                 className="w-[300px] max-sm:w-full bg-transparent outline-none"
+              />
+                <LockOutlined sx={{ color: "#737373" }} />
+            </div>
+             </div>
+
+              <button className=" w-full px-5 py-3 mt-5 mb-7 rounded-xl cursor-pointer bg-blue-1 hover:bg-red-1 text-white text-body-bold text-bold " type="submit">Login</button>
+         
+        </form>
+
+        {/* <h2 className="text-center">BSP</h2> */}
+      </div>
+    </div>
+  );
+};
+
+export default Clientform;
