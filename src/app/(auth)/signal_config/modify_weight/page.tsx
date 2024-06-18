@@ -90,7 +90,7 @@ const ComboboxDemo = () => {
   }, [sensorWeights]);
 
   return (
-    <div className="flex flex-col items-center w-full border-solid border-2 border-[#543310] rounded-md ">
+    <div className="flex flex-col items-center w-full border-solid border-2 border-dc3  rounded-md ">
       {/* <div className="overflow-auto rounded-md shadow"> */}
       <div className="flex flex-row items-center gap-2 m-2">
         <h1>Select by region: </h1>
@@ -180,7 +180,7 @@ const ComboboxDemo = () => {
 
       </div>
       <Button
-      className="bg-[#AF8F6F] hover:bg-[#543310] mt-3"
+      className="bg-[#AF8F6F] hover:bg-dc3  mt-3"
           onClick={async () => {
             console.log(sensorWeights);
             

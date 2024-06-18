@@ -171,7 +171,7 @@ export const deleteSensorFromRegions = async (selectedregions: Iselectedregions)
             // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
             logger.warn(`SensorRegionWeight id: ${_id} not found for update workingstatus.`)
           } else {
-            logger.info(`Updated workingstatus changed to false for ${data.Sensor_ID} in region: ${data.regionName} by ${user?.email}`);
+            logger.info(`Updated workingstatus changed to false for ${data.Sensor_ID} in region: ${data.regionName} by ${user?.email}`,{owner:user?.email});
 
           }
         } catch (error) {
@@ -243,33 +243,33 @@ export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
 
 //new sensor ading
 interface SensorEntry {
-  
+
   regionName: string;
   weight: number;
 }
-interface Iaddsensor{
-  Sensor_ID:string
-  Tagname:string
-  entries:SensorEntry[]
+interface Iaddsensor {
+  Sensor_ID: string
+  Tagname: string
+  entries: SensorEntry[]
 }
-export const addnewsensor=async(data:Iaddsensor)=>{
+export const addnewsensor = async (data: Iaddsensor) => {
   try {
     await connectToDB();
-    const sensor=new Sensor({
-      Sensor_ID:data.Sensor_ID,
-      Tagname:data.Tagname
+    const sensor = new Sensor({
+      Sensor_ID: data.Sensor_ID,
+      Tagname: data.Tagname
     })
     await sensor.save();
-    if(!sensor){
+    if (!sensor) {
       return {
-        message:"signal  already present"
+        message: "signal  already present"
       }
     }
-    for(const entrie of data.entries){
-      const sensorregion=new SensorRegionWeight({
-        Sensor_ID:data.Sensor_ID,
-        weight:entrie.weight,
-        regionName:entrie.regionName
+    for (const entrie of data.entries) {
+      const sensorregion = new SensorRegionWeight({
+        Sensor_ID: data.Sensor_ID,
+        weight: entrie.weight,
+        regionName: entrie.regionName
 
       });
       try {
@@ -279,115 +279,92 @@ export const addnewsensor=async(data:Iaddsensor)=>{
         logger.error(`${data.Sensor_ID} added to region: ${entrie.regionName}  was unable to add `)
       }
     }
-    return{
-      message:"sensor and its regions add successfuly"
+    return {
+      message: "sensor and its regions add successfuly"
     }
   } catch (error) {
     console.log(error);
-    return{
-      message:"somthing went wrong on server"
+    return {
+      message: "somthing went wrong on server"
     }
-    
+
   }
 }
 
 
 //download json file
+interface ISensorData {
+  sensor: string;
+  weight: number;
+}
+
+interface IFormattedRegion {
+  [regionName: string]: ISensorData[];
+}
 export const downloadJsonfile = async () => {
   try {
     await connectToDB()
-    const sensors = await Sensor.find({ regions: { $exists: true, $ne: [] } }, { Sensor_ID: 1, weight: 1, _id: 0, Tagnames: 1 });
-    interface SensorData {
-      ["sensor"]: string;
-      "weight": number;
-    }
-    const sensorObject = []
-    for (const sensor of sensors) {
-      sensorObject.push({
-        ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
-        ["weight"]: sensor.weight
-      })
-      // console.log({
-      //   ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
-      //   ["weight"]: sensor.weight
-      // });
 
-    }
+    const sensorRegions = await SensorRegionWeight.find()
+      .populate('sensor', 'Tagname')
+      .exec();
 
-    const jsonData = JSON.stringify(sensorObject, null, 2); // Optionally add indentation
-    logger.info(`download json file request successfully`)
-    return {
-      data: jsonData, // Return the stringified JSON data
-      message: 'Sensor data download initiated.', // Inform user about download
-    };
+    const regionMap: IFormattedRegion = {};
 
+    sensorRegions.forEach((sensorRegion) => {
+      const regionName = sensorRegion.regionName;
+      const sensorData: ISensorData = {
+        sensor: `${sensorRegion.Sensor_ID}_${sensorRegion?.sensor?.Tagname}`,
+        weight: sensorRegion.weight,
+      };
+
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
+      }
+
+      regionMap[regionName].push(sensorData);
+    });
+    console.log(regionMap);
+
+    return JSON.stringify(regionMap, null, 2);
   } catch (error) {
-    console.log(error);
-
+    console.error("Error formatting regions:", error);
+    throw new Error("Error formatting regions");
   }
 }
-
+//download regionwise picklefille
+interface IFormattedRegion2 {
+  [regionName: string]: string[];
+}
 export const downloadRegionwisePicklefile = async () => {
   try {
-    await connectToDB();
-    const sensors = await Sensor.find({ regions: { $exists: true, $ne: [] } }, { Sensor_ID: 1, regions: 1, _id: 0 });
-    interface piclefileinterface {
-      [regionName: string]: string[]; // Maps region names (strings) to arrays of sensor IDs (strings)
-    }
-    // console.log(JSON.stringify(sensors));
-    const regionMap: Record<string, string[]> = {};
+    await connectToDB()
 
-    for (const sensor of sensors) {
-      for (const regionName in sensor.regions) {
-        if (sensor.regions[regionName].workingStatuse) { // Check workingStatuse
-          const sensorId = sensor.Sensor_ID;
-          regionMap[regionName] = regionMap[regionName] || []; // Initialize if not present
-          regionMap[regionName].push(sensorId);
-        }
+    const sensorRegions = await SensorRegionWeight.find()
+     
+
+    const regionMap: IFormattedRegion2 = {};
+
+    sensorRegions.forEach((sensorRegion) => {
+      const regionName = sensorRegion.regionName;
+      
+
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
       }
-    }
+      if(sensorRegion.workingStatus){
+
+        regionMap[regionName].push(sensorRegion.Sensor_ID);
+      }
+    });
     console.log(regionMap);
-    const jsonData = JSON.stringify(regionMap, null, 2); // Optionally add indentation
-    logger.info(`download regionwisepickle file request successfully`)
 
-    return {
-      data: jsonData, // Return the stringified JSON data
-      message: 'Sensor data download initiated.', // Inform user about download
-    };
-
-
-
-    //   const picklefileobject: piclefileinterface = {};
-    //   // let i=0;
-    // for (const sensor of sensors) {
-    //   // i++;
-    //   for(const region in sensor["regions"]){
-
-    //     // sensorObject[re]
-
-    //     // picklefileobject[region].push(sensor[Sensor_ID]);
-
-    //     // console.log(region);
-
-    //   }
-
-    //   // sensorObject[sensor.Sensor_ID] = { weight: sensor.weight };
-    // }
-
-
-    // return sensorObject;
-    // for (const sensorId in sensorObject) {
-    //   const sensorWeight = sensorObject[sensorId].weight;
-    //   console.log(`Sensor ID: ${sensorId}, Weight: ${sensorWeight}`);
-    // }
-
-    // console.log(picklefileobject);
-
-    // return JSON.stringify(sensorObject);
+    return JSON.stringify(regionMap, null, 2);
   } catch (error) {
-    logger.error(error);
-
+    console.error("Error formatting regions:", error);
+    throw new Error("Error formatting regions");
   }
+ 
 }
 
 

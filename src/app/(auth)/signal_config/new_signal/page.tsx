@@ -58,8 +58,8 @@ const SensorEntryPage: React.FC = () => {
       const newEntry = {regionName: value, weight };
       setEntries([...entries, newEntry]);
       setRegions(regions.filter((r) => r.regionName !== value))
-      const sortedRegions = sortRegionsByName(regions);
-      setRegions(sortedRegions)
+      // const sortedRegions = sortRegionsByName(regions);
+      // setRegions(sortedRegions)
      
       setValue("");
       setWeight(1);
@@ -71,17 +71,21 @@ const SensorEntryPage: React.FC = () => {
     const updatedEntries = entries.filter((_, i) => i !== index);
     setEntries(updatedEntries);
     setRegions([...regions, { regionName: removedEntry.regionName }]);
-    const sortedRegions = sortRegionsByName(regions);
-      setRegions(sortedRegions)
+    // const sortedRegions = sortRegionsByName(regions);
+    //   setRegions(sortedRegions)
   };
 
+  React.useEffect(() => {
+    const sortedRegions = sortRegionsByName(regions);
+      setRegions(sortedRegions)
+  }, [regions]);
   React.useEffect(() => {
     const fetchRegions = async () => {
       await getallregions().then((res) => {
         if (res) {
           const parsedRegions = JSON.parse(res);
-          const sortedRegions = sortRegionsByName(parsedRegions);
-          setRegions(sortedRegions);
+          // const sortedRegions = sortRegionsByName(parsedRegions);
+          setRegions(parsedRegions);
         }
       });
     };
@@ -89,7 +93,7 @@ const SensorEntryPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="p-4 flex flex-col justify-center w-full  place-items-center">
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">
           Sensor ID
@@ -98,7 +102,7 @@ const SensorEntryPage: React.FC = () => {
           type="text"
           value={sensorID}
           onChange={(e) => setSensorID(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          className="mt-1 block w-[400px] rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
         />
       </div>
       <div className="mb-4">
@@ -109,74 +113,74 @@ const SensorEntryPage: React.FC = () => {
           type="text"
           value={tagname}
           onChange={(e) => setTagname(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          className="mt-1 block w-[400px] rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Region</label>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between"
-            >
-              {value ? regions.find((region) => region.regionName === value)?.regionName : "Select region..."}
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command>
-              <CommandInput placeholder="Search regions..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No regions found.</CommandEmpty>
-                <CommandGroup>
-                  {regions.map((region) => (
-                    <CommandItem
-                      key={region.regionName}
-                      value={region.regionName}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue === value ? value : currentValue);
-                        setOpen(false);
-                        // setRegions(regions.filter((r) => r.regionName !== currentValue));
-                      }}
-                    >
-                      {region.regionName}
-                      <CheckIcon
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          value === region.regionName ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
+  <label className="block text-sm font-medium text-gray-700">Region</label>
+  <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className="w-[400px]"
+      >
+        {value ? regions.find((region) => region.regionName === value)?.regionName : "Select region..."}
+        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="p-0">
+      <Command className="w-[400px]">
+        <CommandInput placeholder="Search regions..." className="h-9" />
+        <CommandList>
+          <CommandEmpty>No regions found.</CommandEmpty>
+          <CommandGroup>
+            {regions.map((region) => (
+              <CommandItem
+                key={region.regionName}
+                value={region.regionName}
+                onSelect={(currentValue) => {
+                  setValue(currentValue === value ? value : currentValue);
+                  setOpen(false);
+                  // setRegions(regions.filter((r) => r.regionName !== currentValue));
+                }}
+              >
+                {region.regionName}
+                <CheckIcon
+                  className={cn(
+                    "ml-auto h-4 w-4",
+                    value === region.regionName ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
+  <label className="block text-sm font-medium text-gray-700">Weight</label>
+  <Select
+    onValueChange={(e) => setWeight(Number(e))}
+    value={String(weight)}
+  >
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder="Select a Weight" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>Weights</SelectLabel>
+        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+          <SelectItem key={num} value={String(num)}>
+            {num}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+</div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Weight</label>
-        <Select
-          onValueChange={(e) => setWeight(Number(e))}
-          value={String(weight)}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a Weight" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Weights</SelectLabel>
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-                <SelectItem key={num} value={String(num)}>
-                  {num}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
       </div>
       <div className="mb-4">
         <Button
@@ -186,9 +190,9 @@ const SensorEntryPage: React.FC = () => {
           Add
         </Button>
       </div>
-      <table className="min-w-full bg-white border">
+      {entries.length>0&&<table className="min-w-full bg-white border">
         <thead>
-          <tr className="w-full bg-gray-800 text-white">
+          <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
             <th className="w-1/4 px-4 py-2">Sr. No</th>
             
             <th className="w-1/4 px-4 py-2">Region</th>
@@ -214,14 +218,22 @@ const SensorEntryPage: React.FC = () => {
             </tr>
           ))}
         </tbody>
-      </table>
-      <Button onClick={async()=>{
-        await addnewsensor({Sensor_ID:sensorID,Tagname:tagname,entries}).then((res)=>{
-          console.log(res);
-          
-        })
-
-      }}>Add Sensor</Button>
+      </table>}
+      {entries.length>0&&
+      <Button
+      className="bg-[#AF8F6F] hover:bg-dc3  mt-3"
+      disabled={!sensorID || !tagname}
+       onClick={async()=>{
+         await addnewsensor({Sensor_ID:sensorID,Tagname:tagname,entries}).then((res)=>{
+           console.log(res);
+           toast({
+             description:res.message
+           })
+           
+         })
+        
+        
+      }}>Add Sensor</Button>}
     </div>
   );
 };
