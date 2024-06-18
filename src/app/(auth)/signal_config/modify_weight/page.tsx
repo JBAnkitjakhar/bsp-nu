@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getRegionsensors, getallregions } from "@/actions/region.action";
+import { getRegionsensors, getRegionsensors1, getallregions } from "@/actions/region.action";
 
 import { regionsname, sensorsTagnames } from "@/constants";
 
@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { modifyWeightOfSensors } from "@/actions/sensor.action";
 import PreviousMap from "postcss/lib/previous-map";
 import { redirect, useRouter } from "next/navigation";
+import { ISensor } from "@/lib/interfaces/sensor";
 
 const ComboboxDemo = () => {
   const router = useRouter();
@@ -35,15 +36,19 @@ const ComboboxDemo = () => {
 
   const [value, setValue] = React.useState("");
 
-  interface regionsensors {
-    _id: string;
-    Tagnames: string;
-    weight: Number;
+   interface regionsensors  {
+    _id: string;  // or use mongoose.Types.ObjectId if you prefer
+    regionName: string;
+    weight: number;
+    workingStatus?: boolean;
+    Sensor_ID: string;
+    sensor?: ISensor;
+    id?: string;
   }
 
   const [regionsensors, setRegionsensors] = React.useState<regionsensors[]>([]);
   interface SensorWeights {
-    [Tagnames: string]: { weight: number };
+    [_id: string]: { weight: number };
   }
   const [sensorWeights, setsensorWeights] = React.useState<SensorWeights>({});
 
@@ -61,7 +66,7 @@ const ComboboxDemo = () => {
   React.useEffect(() => {
     // console.log(regionsensors);
     const fun = async () => {
-      await getRegionsensors(value).then((res) => {
+      await getRegionsensors1(value).then((res) => {
         // console.log(res);
         if (res) {
           const data = JSON.parse(res);
@@ -85,7 +90,7 @@ const ComboboxDemo = () => {
   }, [sensorWeights]);
 
   return (
-    <div className="flex flex-col items-center w-full border-solid border-2 border-[#543310] rounded-md ">
+    <div className="flex flex-col items-center w-full border-solid border-2 border-dc3  rounded-md ">
       {/* <div className="overflow-auto rounded-md shadow"> */}
       <div className="flex flex-row items-center gap-2 m-2">
         <h1>Select by region: </h1>
@@ -150,15 +155,15 @@ const ComboboxDemo = () => {
             {regionsensors.map((sensor, index) => (
               <tr key={sensor._id} className="border-b border-gray-800">
                 <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{sensor.Tagnames}</td>
-                <td className="px-4 py-2">{sensor.weight.toString()}</td>
+                <td className="px-4 py-2">{sensor.sensor?.Tagname}</td>
+                <td className="px-4 py-2">{sensor.weight}</td>
                 <td className="px-4 py-2">
                   <select
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       console.log(e.target.value);
                       setsensorWeights((prev) => ({
                         ...prev,
-                        [`${sensor.Tagnames}`]: {
+                        [`${sensor._id}`]: {
                           weight: Number(e.target.value),
                         },
                       }));
@@ -175,15 +180,17 @@ const ComboboxDemo = () => {
 
       </div>
       <Button
-      className="bg-[#AF8F6F] hover:bg-[#543310] mt-3"
+      className="bg-[#AF8F6F] hover:bg-dc3  mt-3"
           onClick={async () => {
+            console.log(sensorWeights);
+            
             await modifyWeightOfSensors(sensorWeights).then(async(res) => {
               console.log(res);
               if (res) {
                 toast({
                   description: res.message,
                 });
-                await getRegionsensors(value).then((res) => {
+                await getRegionsensors1(value).then((res) => {
                   // console.log(res);
                   if (res) {
                     const data = JSON.parse(res);

@@ -1,44 +1,54 @@
 "use server"
 
+import { metadata } from "@/app/layout";
+import { auth } from "@/auth";
 import { ISensor } from "@/lib/interfaces/sensor";
+import { logger } from "@/lib/logger";
 import { Region } from "@/lib/models/region.model";
 import { Sensor } from "@/lib/models/sensor.model";
+import { SensorRegionWeight } from "@/lib/models/sensorRegionWeight.model";
 import connectToDB from "@/lib/mongoose"
 import { AnyAaaaRecord } from "dns";
 import Optional from 'mongoose';
 const mongoose = require('mongoose'); // Assuming you have Mongoose installed
+//load all sensor
+//for geting all sensors 
+export const loadSensors = async () => {
+  try {
 
+    await connectToDB();
+    const sensorList = await Sensor.find({}, {
+      __v: 0, _id: 0
+    }).exec();
+    console.log('Sensors loaded:', sensorList);
+    return JSON.stringify(sensorList)
+  } catch (error) {
+    console.log(error);
+    return [];
+
+  }
+};
 interface SensorData {
   Sensor_ID: string;
   Tagnames: string;
   weight: number;
 }
-
+//inital adding sensors to database 
 export const addSensorsToDatabase = async (sensorData: SensorData[]) => {
   try {
-    // Connect to your MongoDB database
-    // let data=JSON.stringify(sensorData)
     await connectToDB();
-    // Loop through each sensor object in the data
-    // data=JSON.parse(data);
-
+    console.log(sensorData);
     for (const sensor of sensorData) {
       // Extract sensor information
       const sensorId = `[${sensor.Sensor_ID}]` // Remove leading and trailing brackets
       const tagnames = sensor.Tagnames;
-      const weight = 1; // Assuming weight is always 1, adjust if needed
-
-      // Create a new Sensor document
-      // console.log(sensor);mongo
-
       const newSensor = new Sensor({
         Sensor_ID: sensorId,
-        Tagnames: tagnames,
-        weight: weight
+        Tagname: tagnames,
+
       });
 
       try {
-        // Attempt to save the sensor, handle potential duplicate key errors
         await newSensor.save();
         console.log(`Added sensor: ${sensorId}`);
       } catch (error: any) {
@@ -58,146 +68,132 @@ export const addSensorsToDatabase = async (sensorData: SensorData[]) => {
   }
 }
 // use for initial setup of sensor.regions array
-export const addsensorregions = async (sensorData: { [region: string]: string[] }) => {
+export const addsensortoregions = async (sensorData: { [region: string]: string[] }) => {
   try {
-    // Connect to your MongoDB database
     await connectToDB();
-    // Loop through each sensor object in the data
-    const data = getSensorRegions(sensorData)
-    console.log(data);
-    // for(const Sensor_ID in data){
-    //   const regions=data[Sensor_ID]
-    //   console.log(Sensor_ID,"clg",regions);
+    console.log(sensorData);
+    for (const region in sensorData) {
+      const sensors = sensorData[region];
+      for (const sensor of sensors) {
+        const sensorRegionWeight = new SensorRegionWeight({
+          Sensor_ID: sensor,
+          regionName: region
+        })
+        try {
+          await sensorRegionWeight.save();
+          console.log(`${sensor} added to region: ${region} successfully`);
 
-    // }
-
-    for (const Sensor_ID in data) {
-      const regions = data[Sensor_ID]
-      try {
-        const sensor = await Sensor.findOne({ Sensor_ID })
-        sensor.regions = regions
-        await sensor.save()
-        console.log(sensor);
-
-      } catch (error) {
-        console.log(error);
-
+        } catch (error) {
+          console.log(error);
+        }
       }
-
-
     }
-    console.log('All sensors region added successfully');
-
+    console.log('All sensors aded to  regions  successfully');
   } catch (error) {
     console.error(error);
   }
 }
-
-//get sensor region
-
-interface SensorRegionMap {
-  [sensorId: string]: { [regionName: string]: { workingStatuse: boolean } };
-}
-
-function getSensorRegions(sensorData: { [region: string]: string[] }): SensorRegionMap {
-  const sensorRegions: SensorRegionMap = {};
-
-  // Loop through each region and its sensor list
-  for (const region in sensorData) {
-    const sensors = sensorData[region];
-
-    // Loop through each sensor in the region
-    for (const sensor of sensors) {
-      // Remove square brackets from sensor IDs (assuming they are valid sensor IDs)
-      const sensorId = sensor; // Remove leading and trailing brackets
-
-      // Add the region to the sensor's region map with workingStatuses set to true
-      sensorRegions[sensorId] = sensorRegions[sensorId] || {}; // Initialize if not present
-      sensorRegions[sensorId][region] = { workingStatuse: true };
-    }
-  }
-
-  return sensorRegions;
-}
-
-//get sensor data
-export const getSensorData = async (sensorId: string): Promise<string | null> => {
-  try {
-    await connectToDB(); // Assuming you have a separate function to connect to the database
-
-    const sensor: ISensor | null = await Sensor.findOne({ Sensor_ID: sensorId });
-
-    if (!sensor) {
-      console.log(`Sensor with ID '${sensorId}' not found.`);
-      return null; // Explicitly return null for clarity
-    }
-
-    return JSON.stringify(sensor);
-  } catch (error) {
-    console.error('Error retrieving sensor data:', error);
-    throw error; // Re-throw the error for better handling in the calling code
-  }
-}
-interface SensorRegion {
-  [regionName: string]: {
-    workingStatuse: boolean;
-    // Add other properties as needed
-  };
-}
 //add sensor to regions
-export const addSensorToRegions = async (Tagnames: string, regions: SensorRegion) => {
+interface Iselectedregions {
+  [_id: string]: {
+    workingStatus: boolean
+    regionName?: string,
+  }
+}
+export const addSensorToRegions = async (selectedregions: Iselectedregions) => {
   try {
-    console.log(regions);
+
     await connectToDB();
-    const sensor = await Sensor.findOne({ Tagnames });
-    if (!sensor) {
-      throw new Error(`Sensor not found: ${Tagnames}`)
-    }
-    sensor.regions=regions;
-    
-    
-    await sensor.save();
-    console.log(sensor);
-    return{
-      message:"Sensor added to regions successfully"
+    // console.log(selectedregions);
+    const session = await auth();
+    const user = session?.user;
+    // console.log(user);
+
+    for (const _id in selectedregions) {
+      if (selectedregions[_id].workingStatus) {
+        try {
+          const data = await SensorRegionWeight.findOneAndUpdate(
+            { _id: _id }, // Filter to find sensor by ID
+            { $set: { workingStatus: true } }, // Update weight using $set operator
+            { new: true } // Return the updated document
+          );
+          if (!data) {
+            // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+            logger.warn(`SensorRegionWeight id: ${_id} not found for update workingstatus.`)
+          } else {
+            logger.info(`Updated workingstatus changed true for ${data.Sensor_ID} in region: ${data.regionName} `,{ metadata: { owner: user?.email } });
+
+          }
+        } catch (error) {
+          console.log(error);
+
+        }
+      }
+
+
     }
 
-  } catch (error) {
-    console.log(error);
-    return{
-      message:"Failed to add sensor to regions"
-    }
+    // logger.info(`Add regions to this ${sensor.Tagnames} sensor successfuly`)
 
-    }
-    }
-    
-    //delete sensor form regions
-      
-export const deleteSensorFromRegions = async (Tagnames: string, regions: SensorRegion) => {
-  try {
-    await connectToDB();
-    console.log(regions);
-    
-    const sensor = await Sensor.findOne({ Tagnames });
-    if (!sensor) {
-      throw new Error(`Sensor not found: ${Tagnames}`)
-    }
-    // const regions = sensor["regions"];
-    // for (const region of regionNames) {
-    //   regions[region] = { workingStatuse: false };
-    // }
-    sensor.regions=regions;
-    await sensor.save();
-    console.log(sensor);
     return {
-      message: "Sensor deleted from regions successfully",
+      message: "Sensor added to regions successfully"
     }
-
 
   } catch (error) {
     console.log(error);
-    return{
-      message: "Error deleting sensor from regions",
+    return {
+      message: "Failed to add sensor to regions"
+    }
+
+  }
+}
+
+
+//delete sensor form regions
+
+export const deleteSensorFromRegions = async (selectedregions: Iselectedregions) => {
+  try {
+
+    await connectToDB();
+    // console.log(selectedregions);
+    const session = await auth();
+    const user = session?.user;
+    // console.log(user);
+
+    for (const _id in selectedregions) {
+      if (!selectedregions[_id].workingStatus) {
+        try {
+          const data = await SensorRegionWeight.findOneAndUpdate(
+            { _id: _id }, // Filter to find sensor by ID
+            { $set: { workingStatus: false } }, // Update weight using $set operator
+            { new: true } // Return the updated document
+          );
+          if (!data) {
+            // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+            logger.warn(`SensorRegionWeight id: ${_id} not found for update workingstatus.`)
+          } else {
+            logger.info(`Updated workingstatus changed to false for ${data.Sensor_ID} in region: ${data.regionName} `,{ metadata: { owner: user?.email } });
+
+          }
+        } catch (error) {
+          console.log(error);
+
+        }
+      }
+
+
+    }
+
+    // logger.info(`Add regions to this ${sensor.Tagnames} sensor successfuly`)
+
+    return {
+      message: "Sensor Removed from regions successfully"
+    }
+
+  } catch (error) {
+    console.log(error);
+    return {
+      message: "Failed to add sensor to regions"
     }
 
   }
@@ -205,30 +201,34 @@ export const deleteSensorFromRegions = async (Tagnames: string, regions: SensorR
 
 //modify weigh of sensors
 export interface SensorWeights {
-  [Tagnames: string]: { weight: number };
+  [_id: string]: { weight: number };
 }
 export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
   try {
+    const session = await auth();
+    const user = session?.user;
     await connectToDB(); // Connect to database
 
-    for (const [Tagnames, { weight }] of Object.entries(sensorWeights)) {
-      console.log(`Sensor ID: ${Tagnames}, Weight: ${weight}`);
+    for (const [_id, { weight }] of Object.entries(sensorWeights)) {
+      // console.log(`Sensor ID: ${Tagnames}, Weight: ${weight}`);
       try {
         await connectToDB(); // Ensure database connection is established
 
-        const sensor = await Sensor.findOneAndUpdate(
-          { Tagnames: Tagnames }, // Filter to find sensor by ID
+        const sensor = await SensorRegionWeight.findOneAndUpdate(
+          { _id: _id }, // Filter to find sensor by ID
           { $set: { weight } }, // Update weight using $set operator
           { new: true } // Return the updated document
         );
 
         if (!sensor) {
-          console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+          // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
+          logger.warn(`Sensor with Tagnames: ${_id} not found for update.`,{ metadata: { owner: user?.email } })
         } else {
-          console.log(`Updated sensor weight for: ${Tagnames}`, sensor);
+          logger.info(`Updated sensor weight for: ${_id} :${weight}`,{ metadata: { owner: user?.email } });
+
         }
       } catch (error) {
-        console.error('Error updating sensor weight:', error);
+        logger.error('Error updating sensor weight:', error);
         // Handle individual sensor update errors (optional)
       }
     }
@@ -244,130 +244,137 @@ export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
   }
 };
 
+//new sensor ading
+interface SensorEntry {
 
-//download json file
-export const downloadJsonfile=async ()=>{
-  try {
-    await connectToDB()
-    const sensors =  await Sensor.find({ regions: { $exists: true, $ne: [] } }, { Sensor_ID: 1, weight: 1,_id:0 ,Tagnames:1});
-    interface SensorData {
-      ["sensor"]: string;
-      "weight": number;
-    }
-    const sensorObject =[]
-  for (const sensor of sensors) {
-    sensorObject.push({
-      ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
-      ["weight"]: sensor.weight
-    }) 
-    console.log({
-      ["sensor"]: `${sensor.Sensor_ID}_${sensor.Tagnames}`,
-      ["weight"]: sensor.weight
-    });
-    
-  }
-
-  const jsonData = JSON.stringify(sensorObject, null, 2); // Optionally add indentation
-  return {
-    data: jsonData, // Return the stringified JSON data
-    message: 'Sensor data download initiated.', // Inform user about download
-  };
-  
-  } catch (error) {
-    console.log(error);
-    
-  }
+  regionName: string;
+  weight: number;
 }
-
-export const downloadRegionwisePicklefile=async()=>{
+interface Iaddsensor {
+  Sensor_ID: string
+  Tagname: string
+  entries: SensorEntry[]
+}
+export const addnewsensor = async (data: Iaddsensor) => {
   try {
+    const session = await auth();
+    const user = session?.user;
     await connectToDB();
-    const sensors =  await Sensor.find({ regions: { $exists: true, $ne: [] } }, { Sensor_ID: 1, regions: 1,_id:0 });
-    interface piclefileinterface {
-      [regionName: string]: string[]; // Maps region names (strings) to arrays of sensor IDs (strings)
-    }
-    // console.log(JSON.stringify(sensors));
-    const regionMap: Record<string, string[]> = {};
-
-    for (const sensor of sensors) {
-      for (const regionName in sensor.regions) {
-        if (sensor.regions[regionName].workingStatuse) { // Check workingStatuse
-          const sensorId = sensor.Sensor_ID;
-          regionMap[regionName] = regionMap[regionName] || []; // Initialize if not present
-          regionMap[regionName].push(sensorId);
-        }
+    const sensor = new Sensor({
+      Sensor_ID: data.Sensor_ID,
+      Tagname: data.Tagname
+    })
+    await sensor.save();
+    if (!sensor) {
+      return {
+        message: "signal  already present"
       }
     }
-  console.log(regionMap);
-  const jsonData = JSON.stringify(regionMap, null, 2); // Optionally add indentation
-  return {
-    data: jsonData, // Return the stringified JSON data
-    message: 'Sensor data download initiated.', // Inform user about download
-  };
-  
+    logger.info(`Sensor with id: ${data.Sensor_ID} add to database  successfulllly `,{ metadata: { owner: user?.email } })
+    for (const entrie of data.entries) {
+      const sensorregion = new SensorRegionWeight({
+        Sensor_ID: data.Sensor_ID,
+        weight: entrie.weight,
+        regionName: entrie.regionName
 
-    
-  //   const picklefileobject: piclefileinterface = {};
-  //   // let i=0;
-  // for (const sensor of sensors) {
-  //   // i++;
-  //   for(const region in sensor["regions"]){
+      });
+      try {
+        await sensorregion.save();
+        logger.info(`${data.Sensor_ID} added to region: ${entrie.regionName} successfully`,{ metadata: { owner: user?.email } })
+      } catch (error) {
+        logger.error(`${data.Sensor_ID} added to region: ${entrie.regionName}  was unable to add `,{ metadata: { owner: user?.email } })
+      }
+    }
+    return {
+      message: "sensor and its regions add successfuly"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      message: "somthing went wrong on server"
+    }
 
-  //     // sensorObject[re]
+  }
+}
 
-  //     // picklefileobject[region].push(sensor[Sensor_ID]);
 
-  //     // console.log(region);
+//download json file
+interface ISensorData {
+  sensor: string;
+  weight: number;
+}
+
+interface IFormattedRegion {
+  [regionName: string]: ISensorData[];
+}
+export const downloadJsonfile = async () => {
+  try {
+    await connectToDB()
+
+    const sensorRegions = await SensorRegionWeight.find()
+      .populate('sensor', 'Tagname')
+      .exec();
+
+    const regionMap: IFormattedRegion = {};
+
+    sensorRegions.forEach((sensorRegion) => {
+      const regionName = sensorRegion.regionName;
+      const sensorData: ISensorData = {
+        sensor: `${sensorRegion.Sensor_ID}_${sensorRegion?.sensor?.Tagname}`,
+        weight: sensorRegion.weight,
+      };
+
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
+      }
+
+      regionMap[regionName].push(sensorData);
+    });
+    console.log(regionMap);
+
+    return JSON.stringify(regionMap, null, 2);
+  } catch (error) {
+    console.error("Error formatting regions:", error);
+    throw new Error("Error formatting regions");
+  }
+}
+//download regionwise picklefille
+interface IFormattedRegion2 {
+  [regionName: string]: string[];
+}
+export const downloadRegionwisePicklefile = async () => {
+  try {
+    await connectToDB()
+
+    const sensorRegions = await SensorRegionWeight.find()
+     
+
+    const regionMap: IFormattedRegion2 = {};
+
+    sensorRegions.forEach((sensorRegion) => {
+      const regionName = sensorRegion.regionName;
       
-  //   }
-    
-  //   // sensorObject[sensor.Sensor_ID] = { weight: sensor.weight };
-  // }
 
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
+      }
+      if(sensorRegion.workingStatus){
 
-  // return sensorObject;
-  // for (const sensorId in sensorObject) {
-  //   const sensorWeight = sensorObject[sensorId].weight;
-  //   console.log(`Sensor ID: ${sensorId}, Weight: ${sensorWeight}`);
-  // }
-    
-    // console.log(picklefileobject);
-    
-  // return JSON.stringify(sensorObject);
+        regionMap[regionName].push(sensorRegion.Sensor_ID);
+      }
+    });
+    console.log(regionMap);
+
+    return JSON.stringify(regionMap, null, 2);
   } catch (error) {
-    console.log(error);
-    
+    console.error("Error formatting regions:", error);
+    throw new Error("Error formatting regions");
   }
+ 
 }
 
-export const getallsensors=async()=>{
-  try {
-    await connectToDB()
-    const sensors=await Sensor.find({},{Tagnames:1,_id:0});
-    // console.log(sensors);
-    return JSON.stringify(sensors);
-  } catch (error) {
-    console.log(error);
-    
-  }
-  
-}
-export const getasensor=async(Tagnames:string)=>{
-  try {
-    await connectToDB()
-    console.log("get a sensor called",Tagnames);
-    
-   const sensor=await Sensor.findOne({Tagnames});
-   console.log(sensor);
-   return JSON.stringify(sensor);
-   
-   
-  } catch (error) {
-    console.log(error);
-    
-  }
-  
-}
+
+
 
 
 

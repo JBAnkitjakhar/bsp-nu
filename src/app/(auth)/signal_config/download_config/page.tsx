@@ -5,9 +5,9 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className="flex flex-col gap-3 justify-center items-center w-full border-solid border-2 border-[#543310] rounded-md ">
+    <div className="flex flex-col gap-3 justify-center items-center w-full border-solid border-2 border-dc3  rounded-md ">
       <Button
-        className="bg-[#AF8F6F] hover:bg-[#543310] text-white font-bold py-2 px-4 rounded-full shadow-md"
+        className="bg-[#AF8F6F] hover:bg-dc3  text-white font-bold py-2 px-4 rounded-full shadow-md"
         onClick={async () => {
           console.log("downloadJsonfile button clicked");
   
@@ -15,7 +15,7 @@ const page = () => {
             if (data) {
               // const jsondata = JSON.parse(data.data)
   
-              const blob = new Blob([data.data], { type: 'application/json' });
+              const blob = new Blob([data], { type: 'application/json' });
               const downloadUrl = URL.createObjectURL(blob);
               const downloadLink = document.createElement('a');
               downloadLink.href = downloadUrl;
@@ -30,14 +30,14 @@ const page = () => {
         Download Json.file
       </Button>
       <Button
-        className="bg-[#AF8F6F] hover:bg-[#543310] text-white font-bold py-2 px-4 rounded-full shadow-md"
+        className="bg-[#AF8F6F] hover:bg-dc3  text-white font-bold py-2 px-4 rounded-full shadow-md"
         onClick={async () => {
           console.log("downloadRegionwisePicklefile button clicked");
           await downloadRegionwisePicklefile().then((data) => {
             if (data) {
               // const jsondata = JSON.parse(data.data)
   
-              const blob = new Blob([data.data], { type: 'application/json' });
+              const blob = new Blob([data], { type: 'application/json' });
               const downloadUrl = URL.createObjectURL(blob);
               const downloadLink = document.createElement('a');
               downloadLink.href = downloadUrl;

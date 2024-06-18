@@ -35,6 +35,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     user?.password
                 );
                 if (passwordCorrect) {
+                    logger.info(`login request successfully`,{ metadata: { owner: user?.email } });
                     return user;
                 }
                 throw new Error("Invalid email or password");

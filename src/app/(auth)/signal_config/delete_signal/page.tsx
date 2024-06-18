@@ -18,23 +18,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getRegionsensors, getallregions } from "@/actions/region.action";
-import {
-  addSensorToRegions,
-  deleteSensorFromRegions,
-  getallsensors,
-  getasensor,
-} from "@/actions/sensor.action";
-import { regionsname, sensorsTagnames } from "@/constants";
+import { getRegionsForSensorId, getRegionsensors, getallregions } from "@/actions/region.action";
+import { deleteSensorFromRegions, loadSensors, } from "@/actions/sensor.action";
+
 import { useToast } from "@/components/ui/use-toast";
 
 const ComboboxDemo = () => {
-  interface SensorRegion {
-    [regionName: string]: {
-      workingStatuse: boolean;
-      // Add other properties as needed
-    };
-  }
+
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [open1, setOpen1] = React.useState(false);
@@ -42,28 +32,60 @@ const ComboboxDemo = () => {
   const [value, setValue] = React.useState("");
   const [value1, setValue1] = React.useState("");
   const [value2, setValue2] = React.useState("");
+  interface Iregions {
+    regionName: string
+  }
+  const [regions, setRegions] = React.useState<Iregions[]>([]);
+  const [sensor_id, setSensor_id] = React.useState<string>("");
+  interface ISensors {
+    Sensor_ID: string;
+    Tagname: string;
+  }
+  const [sensors, setSensors] = React.useState<ISensors[]>([]);
+
   interface regionsensors {
-    _id: string;
-    Tagnames: string;
+    Sensor_ID: string;
+    Tagname: string;
   }
 
   const [regionsensors, setRegionsensors] = React.useState<regionsensors[]>([]);
-  interface ISensor {
-    _id: string;
-    Sensor_ID: string;
-    Tagnames: string;
-    weight: number;
-    regions: SensorRegion; // Reference the SensorRegion interface
-    __v: number;
-  }
-  const [sensor, setSensor] = React.useState<ISensor>();
-  const [sensorregions, setsensorregions] = React.useState<SensorRegion>({});
-  const [selsectedregions, setselsectedregions] = React.useState<SensorRegion>(
-    {}
-  );
 
-  const sensors = sensorsTagnames;
-  const regions = regionsname;
+  interface SensorRegion {
+    _id: string,
+    regionName?: string,
+    workingStatus: boolean,
+    id?: string
+  }
+  const [sensorregions, setSensorregions] = React.useState<SensorRegion[]>([]);
+  interface Iselectedregions {
+    [_id: string]: {
+      workingStatus: boolean
+      regionName?: string,
+    }
+  }
+  const [selsectedregions, setSelectedregions] = React.useState<Iselectedregions>({});
+
+  React.useEffect(() => {
+    const fun = async () => {
+
+      await getallregions().then((res) => {
+        if (res) {
+          console.log(res);
+          setRegions(JSON.parse(res))
+
+        }
+      })
+      await loadSensors().then((res: any) => {
+        if (res) {
+          console.log(JSON.parse(res));
+          setSensors(JSON.parse(res));
+
+        }
+
+      })
+    }
+    fun();
+  }, [])
 
   React.useEffect(() => {
     const fun = async () => {
@@ -75,42 +97,33 @@ const ComboboxDemo = () => {
         }
       });
     };
-    fun();
+    if (value) {
+
+      fun();
+    }
   }, [value]);
 
-  React.useEffect(() => {
-    const fun = async () => {
-      await getasensor(value2).then((res) => {
-        console.log(res);
-        if (res) {
-          const data = JSON.parse(res);
-          console.log(data);
-          setsensorregions(data?.regions);
-          setselsectedregions({});
-        }
-      });
-    };
-    fun();
-  }, [value2]);
+
 
   React.useEffect(() => {
     const fun = async () => {
-      await getasensor(value1).then((res) => {
-        console.log(res);
+      await getRegionsForSensorId(sensor_id).then((res: any) => {
         if (res) {
-          const data = JSON.parse(res);
-          console.log(data);
-          setSensor(data);
-          setsensorregions(data?.regions);
-          setselsectedregions({});
+          console.log(JSON.parse(res));
+          setSensorregions(JSON.parse(res))
+
         }
-      });
+      })
+
     };
-    fun();
-  }, [value1]);
+    if (sensor_id != "") {
+
+      fun();
+    }
+  }, [sensor_id]);
 
   return (
-    <div className="flex flex-col w-full content-center place-content-center place-items-center gap-4 p-3 border-solid border-2 border-[#543310] rounded-md">
+    <div className="flex flex-col w-full content-center place-content-center place-items-center gap-4 p-3 border-solid border-2 border-dc3 rounded-md">
       <div >
         <h1>Select by sensor Tagname: </h1>
         <Popover open={open1} onOpenChange={setOpen1}>
@@ -122,7 +135,7 @@ const ComboboxDemo = () => {
               className="w-[200px] justify-between overflow-hidden"
             >
               {value1
-                ? sensors.find((sensor) => sensor.Tagnames === value1)?.Tagnames
+                ? sensors.find((sensor) => `${sensor.Sensor_ID} ${sensor.Tagname}` === value1)?.Tagname
                 : " sensors..."}
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -133,20 +146,21 @@ const ComboboxDemo = () => {
               <CommandList>
                 <CommandEmpty>No sensors found.</CommandEmpty>
                 <CommandGroup>
-                  {sensors.map((sensor, index) => (
+                  {sensors && sensors?.map((sensor, index) => (
                     <CommandItem
                       key={index}
-                      value={sensor.Tagnames}
+                      value={`${sensor.Sensor_ID} ${sensor.Tagname}`}
                       onSelect={(currentValue) => {
-                        setValue1(currentValue === value1 ? "" : currentValue);
+                        setValue1(currentValue === value1 ? value1 : currentValue);
+                        setSensor_id(sensor.Sensor_ID)
                         setOpen1(false);
                       }}
                     >
-                      {sensor.Tagnames}
+                      {`${sensor.Sensor_ID} ${sensor.Tagname}`}
                       <CheckIcon
                         className={cn(
                           "ml-auto h-4 w-4",
-                          value === sensor.Tagnames ? "opacity-100" : "opacity-0"
+                          value1 === `${sensor.Sensor_ID} ${sensor.Tagname}` ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -218,9 +232,9 @@ const ComboboxDemo = () => {
                   aria-expanded={open2}
                   className="w-[200px] justify-between overflow-hidden"
                 >
-                  {value2
-                    ? regionsensors.find((sensor) => sensor.Tagnames === value2)
-                      ?.Tagnames
+                  {value
+                    ? regionsensors.find((sensor) => `${sensor.Sensor_ID} ${sensor.Tagname}` === value2)
+                      ?.Tagname
                     : "regions..."}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -237,20 +251,21 @@ const ComboboxDemo = () => {
                       {regionsensors.map((sensor, index) => (
                         <CommandItem
                           key={index}
-                          value={sensor.Tagnames}
+                          value={`${sensor.Sensor_ID} ${sensor.Tagname}`}
                           onSelect={async (currentValue) => {
                             // hendleSelectregion();
                             setValue2(
-                              currentValue === value2 ? value2 : currentValue
+                              currentValue === value2 ? "" : currentValue
                             );
+                            setSensor_id(sensor.Sensor_ID);
                             setOpen2(false);
                           }}
                         >
-                          {sensor.Tagnames}
+                          {`${sensor.Sensor_ID} ${sensor.Tagname}`}
                           <CheckIcon
                             className={cn(
                               "ml-auto h-4 w-4",
-                              value2 === sensor.Tagnames
+                              value === `${sensor.Sensor_ID} ${sensor.Tagname}`
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
@@ -265,13 +280,64 @@ const ComboboxDemo = () => {
           </div>
         )}
       </div>
-      <div className="flex flex-row w-full gap-4 ">
+      {sensor_id&&<div className="flex flex-row w-full gap-4 ">
+        <div className="max-h-[50vh] basis-1/2 overflow-auto">
+
+          <table className="table w-full rounded-lg border ">
+            <caption className="caption-top">
+              Select the region
+            </caption>
+            <thead >
+              <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
+                <th className="px-4 py-2">Sr. No.</th>
+                <th className="px-4 py-2">Region Name</th>
+                <th className="px-4 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sensorregions && // Check if regions exist before accessing
+                sensorregions.map(
+                  (region, index) =>
+                    region.workingStatus && (
+                      <tr key={region._id} className="border-b">
+                        <td className="px-4 py-2">{index + 1}</td>
+                        <td className="px-4 py-2">{region.regionName}</td>
+                        <td className="px-4 py-2">
+                          <Button
+                            className="bg-[#AF8F6F] hover:bg-dc3"
+                            onClick={() => {
+                              console.log(selsectedregions);
+                              setSensorregions((prevRegions) =>
+                                prevRegions.map((region1) =>
+                                  region1.regionName === region.regionName
+                                    ? { ...region1, workingStatus: false }
+                                    : region1
+                                )
+                              )
+                              setSelectedregions((prevSelectedRegions) => ({
+                                ...prevSelectedRegions,
+                                [region._id]: {
+                                  workingStatus: false,
+                                  regionName: region.regionName
+                                },
+                              }));
+                            }}
+                          >
+                            Remove from region
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                )}
+            </tbody>
+          </table>
+        </div>
         <div className="max-h-[50vh]  basis-1/2 overflow-auto">
 
           <table className="table w-full  rounded-lg border ">
-          <caption className="caption-top">
-          Selected list
-  </caption>
+            <caption className="caption-top">
+              Selected list
+            </caption>
             <thead>
               <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
                 <th className="px-4 py-2">Sr. No.</th>
@@ -282,30 +348,29 @@ const ComboboxDemo = () => {
             <tbody>
               {selsectedregions && // Check if regions exist before accessing
                 Object.entries(selsectedregions).map(
-                  ([regionName], index) =>
-                    !selsectedregions[`${regionName}`].workingStatuse && (
-                      <tr key={regionName} className="border-b">
+                  ([_id], index) =>
+                    !selsectedregions[_id].workingStatus && (
+                      <tr key={_id} className="border-b">
                         <td className="px-4 py-2">{index + 1}</td>
-                        <td className="px-4 py-2">{regionName}</td>
+                        <td className="px-4 py-2">{selsectedregions[_id]?.regionName}</td>
                         <td className="px-4 py-2">
                           <Button
-                          className="bg-[#AF8F6F] hover:bg-[#543310]"
+                            className="bg-[#AF8F6F] hover:bg-dc3"
                             onClick={() => {
-                              console.log(regionName);
-                              setsensorregions((prevSensorRegions) => {
-                                const updatedSensorRegions = {
-                                  ...prevSensorRegions,
-                                };
-                                if (updatedSensorRegions[regionName]) {
-                                  updatedSensorRegions[
-                                    regionName
-                                  ].workingStatuse = true;
-                                }
-                                return updatedSensorRegions;
-                              });
-                              setselsectedregions((prevSelectedRegions) => ({
+                              console.log(sensorregions);
+                              setSensorregions((prevRegions) =>
+                                prevRegions.map((region1) =>
+                                  region1.regionName === selsectedregions[_id]?.regionName
+                                    ? { ...region1, workingStatus: true }
+                                    : region1
+                                )
+                              )
+                              setSelectedregions((prevSelectedRegions) => ({
                                 ...prevSelectedRegions,
-                                [regionName]: { workingStatuse: true }, // Copy region data from sensorRegions
+                                [_id]: {
+                                  workingStatus: true,
+                                  regionName: selsectedregions[_id]?.regionName
+                                },
                               }));
                             }}
                           >
@@ -318,82 +383,31 @@ const ComboboxDemo = () => {
             </tbody>
           </table>
         </div>
-        <div className="max-h-[50vh]  basis-1/2 overflow-auto">
 
-          <table className="table w-full rounded-lg border ">
-          <caption className="caption-top">
-          Select the region
-  </caption>
-            <thead >
-              <tr className="bg-[#AF8F6F] text-gray-100 font-semibold sticky top-0">
-                <th className="px-4 py-2">Sr. No.</th>
-                <th className="px-4 py-2">Region Name</th>
-                <th className="px-4 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sensorregions && // Check if regions exist before accessing
-                Object.entries(sensorregions).map(
-                  ([regionName], index) =>
-                    sensorregions[`${regionName}`].workingStatuse && (
-                      <tr key={regionName} className="border-b">
-                        <td className="px-4 py-2">{index + 1}</td>
-                        <td className="px-4 py-2">{regionName}</td>
-                        <td className="px-4 py-2">
-                          <Button
-                          className="bg-[#AF8F6F] hover:bg-[#543310]"
-                            onClick={() => {
-                              console.log(regionName);
-                              setsensorregions((prevSensorRegions) => {
-                                const updatedSensorRegions = {
-                                  ...prevSensorRegions,
-                                };
-                                if (updatedSensorRegions[regionName]) {
-                                  updatedSensorRegions[
-                                    regionName
-                                  ].workingStatuse = false;
-                                }
-                                return updatedSensorRegions;
-                              });
-                              setselsectedregions((prevSelectedRegions) => ({
-                                ...prevSelectedRegions,
-                                [regionName]: sensorregions[regionName], // Copy region data from sensorRegions
-                              }));
-                            }}
-                          >
-                           Remove from region
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </div>}
 
 
 
-      
-      <Button
-      className="bg-[#AF8F6F] hover:bg-[#543310] mt-3"
+
+      {sensor_id&&<Button
+        className="bg-[#AF8F6F] hover:bg-dc3 mt-3"
 
         onClick={async () => {
-          if (sensor) {
-            await deleteSensorFromRegions(sensor.Tagnames, sensorregions).then(
+          if (sensor_id) {
+            await deleteSensorFromRegions(selsectedregions).then(
               (res) => {
                 console.log(res);
                 toast({
                   description: res.message,
                 });
-                setselsectedregions({});
+                setSelectedregions({});
               }
             );
           }
         }}
       >
         Apply changes
-      </Button> 
+      </Button>}
 
 
 

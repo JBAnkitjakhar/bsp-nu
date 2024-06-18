@@ -6,6 +6,7 @@ export const publicRoutes = [
   
   export const adminOnlyRoutes = [
     "/admin/register",
+    "/logs"
   ];
   
   export const normalUserRoutes = [
@@ -14,4 +15,5 @@ export const publicRoutes = [
   
   export const powerUserRestrictedRoutes = [
     /^\/admin\/?.*/, // Regex to match /admin and any sub-routes
+    "/logs"
   ];

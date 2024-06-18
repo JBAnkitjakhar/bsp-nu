@@ -19,6 +19,7 @@ const config = {
     },
     extend: {
       colors: {
+<<<<<<< HEAD
           "blue-1": "#0A065C",
           "blue-2": "#F5F7FB",
           "blue-3": "#04A1E3",
@@ -31,6 +32,11 @@ const config = {
           "green-1": "#13E0E0",
           "pink-1": "#FDDAD6",
          
+=======
+        dc1:"#74512D",
+        dc2 :"#F8F4E1",
+        dc3 :"#543310",
+>>>>>>> fix
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

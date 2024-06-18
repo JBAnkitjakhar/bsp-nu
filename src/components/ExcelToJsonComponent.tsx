@@ -19,6 +19,8 @@ const ExcelToJsonComponent: React.FC = () => {
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
         setJsonData(json);
+        console.log(json);
+        
       };
       reader.readAsArrayBuffer(file);
     }

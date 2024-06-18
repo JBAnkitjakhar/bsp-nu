@@ -1,19 +1,14 @@
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
-import { log } from 'console';
-// import { auth } from './auth';
-import { authConfig } from './auth.config';
-import NextAuth from 'next-auth';
-const { auth } = NextAuth(authConfig);
+import { adminOnlyRoutes, normalUserRoutes, powerUserRestrictedRoutes, publicRoutes } from './lib/routes';
+
+// import { loadSensors } from './actions/sensor.action';
+
+
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
-    const session = await auth();
-    // console.log(session?.user?.userType);
-    
-
-    
+    // loadSensors().catch(err => console.error('Failed to load sensors on startup:', err));
     // return NextResponse.next();
     // console.log("salt: ",process.env.AUTH_SALT);
 //     const rawToken = await getToken({ reqL:request, raw: true })
@@ -40,18 +35,23 @@ export async function middleware(request: NextRequest) {
     }
 
     const userType = token?.userType;
-
+    
     if (userType === 'admin') {
-        if (pathname !== '/admin/register') {
+        if(adminOnlyRoutes.includes(pathname)){
+            return NextResponse.next();
+        }
+        else{
+    
             return NextResponse.redirect(new URL('/admin/register', request.url));
         }
+        
     } else if (userType === 'normal') {
         if (!normalUserRoutes.includes(pathname)) {
             return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     } else if (userType === 'poweruser') {
         if (powerUserRestrictedRoutes.some(route => pathname.match(route))) {
-            return NextResponse.redirect(new URL('/', request.url));
+            return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     }
 

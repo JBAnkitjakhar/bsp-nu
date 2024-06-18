@@ -101,15 +101,28 @@
 
 
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from './ui/button'
-import { SensorWeights, addSensorToRegions, deleteSensorFromRegions, downloadJsonfile, downloadRegionwisePicklefile, getSensorData, modifyWeightOfSensors } from '@/actions/sensor.action'
-import { addRegionsToDatabase, findsensorbyRegion, getRegionsForSensorId, getRegionsensors } from '@/actions/region.action'
+import { SensorWeights, addSensorToRegions, deleteSensorFromRegions, downloadJsonfile, downloadRegionwisePicklefile,  modifyWeightOfSensors } from '@/actions/sensor.action'
+import { addRegionsToDatabase,  getRegionsForSensorId, getRegionsensors } from '@/actions/region.action'
+import { getlogs } from '@/actions/logs.action'
 
 
 const AddsensorButton = () => {
+  const [logdata,setlogdata]=useState([]);
   return (
-    <div>dsdsd</div>
+    <div>
+    <Button onClick={async()=>{
+      await getlogs().then((data:any)=>{
+        if(data){
+
+          setlogdata(data);
+        }
+        console.log(data)
+      })
+    }}>getlogs</Button>
+    <h1>{JSON.stringify(logdata)}</h1>
+    </div>
   )
 }
 
