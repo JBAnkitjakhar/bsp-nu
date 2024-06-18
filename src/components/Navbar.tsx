@@ -37,6 +37,10 @@ const Navbar = async () => {
            className="text-white transition-colors hover:text-dc3  hover:bg-dc2 rounded-lg px-3 py-2 m-1">
             Signal-Config
         </Link>}
+        {userRole==="Admin"&&<Link href="/logs"
+           className="text-white transition-colors hover:text-dc3  hover:bg-dc2 rounded-lg px-3 py-2 m-1">
+            Logs
+        </Link>}
         {session?.user && <SignOutButton />}
       </nav>
     </header>
