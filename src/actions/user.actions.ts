@@ -2,9 +2,10 @@
 'use server'
 import { AuthError, CredentialsSignin } from "next-auth";
 
-import { signIn, signOut } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { User } from "@/lib/models/user.model";
 import connectToDB from "@/lib/mongoose";
+import { logger } from "@/lib/logger";
 
 // import { signIn, signOut } from "@/auth";
 
@@ -70,6 +71,10 @@ export async function registerUser(formData:User): Promise<any> {
     const hashedPassword = await bcrypt.hash(formData.password, 10);
     const newuser=new User({...formData,password:hashedPassword});
     await newuser.save();
+    const session = await auth();
+    const user1 = session?.user;
+    logger.info(`New user: ${user.email} registration successfully`,{ metadata: { owner: user1?.email } })
+
     return {
       success:true,
       message:"user created successfuly"

@@ -35,16 +35,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getlogs } from "@/actions/logs.action"
+import { fetchLogs, getlogs } from "@/actions/logs.action"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
+import { ILog } from "@/lib/models/log.model"
 
 export type LogEntry = {
     srNo?: number
     message: string
-    timestamp: string
+    timestamp: Date
     level?: string
     owner?: string
 }
@@ -106,6 +107,7 @@ export type LogEntry = {
 const DataTableDemo = () => {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [data, setData] = React.useState<LogEntry[]>([])
+  const [logEntries, setLogEntries] = React.useState<LogEntry[]>([])
   const [selectedOwner, setSelectedOwner] = React.useState<string>('all')
   const [owners, setOwners] = React.useState<string[]>([])
   const [startDate, setStartDate] = React.useState<Date>()
@@ -115,39 +117,51 @@ const DataTableDemo = () => {
     // Fetch logs when the component mounts or when the selected owner changes
     const fetchData = async () => {
       try {
-        const logs = await getlogs();
-        const logEntries: LogEntry[] = logs.map((log, index) => ({
-          srNo: index + 1,
-          message: log.message,
-          timestamp: log.timestamp,
-          level: log.level,
-          owner: log.owner,
-        }));
+        const res = await fetchLogs({ owner: selectedOwner, startDate, endDate });
+        if(res){
+          const logs:ILog[] =JSON.parse(res)
 
-        // Extract unique owners for the select box
-        const uniqueOwners = Array.from(new Set(logEntries.map(log => log.owner || 'default-owner')));
-        setOwners(uniqueOwners);
-
-        let filteredLogs = logEntries;
-        if (selectedOwner !== 'all') {
-          filteredLogs = filteredLogs.filter(log => log.owner === selectedOwner);
+          const procesdata: LogEntry[] = logs.map((log, index) => ({
+            srNo: index + 1,
+            message: log.message,
+            timestamp: log.timestamp,
+            level: log.level,
+            owner: log.meta.owner,
+          }));
+          const uniqueOwners = Array.from(new Set(procesdata.map(log => log.owner || 'default-owner')));
+    setOwners(uniqueOwners);
+  
+          setLogEntries(procesdata)
+  
+          setData(procesdata);
         }
-        if (startDate) {
-          filteredLogs = filteredLogs.filter(log => new Date(log.timestamp) >= startDate);
-        }
-        if (endDate) {
-          const endFilterDate = new Date(endDate);
-        endFilterDate.setHours(23, 59, 59, 999);
-          filteredLogs = filteredLogs.filter(log => new Date(log.timestamp) <= endFilterDate);
-        }
-        setData(filteredLogs);
       } catch (error) {
         console.error('Error fetching logs:', error);
       }
     };
 
     fetchData();
-  }, [selectedOwner, startDate, endDate]);
+  }, []);
+  React.useEffect(() => {
+    
+    
+
+    let filteredLogs = logEntries;
+    if (selectedOwner !== 'all') {
+      filteredLogs = filteredLogs.filter(log => log.owner === selectedOwner);
+    }
+    if (startDate) {
+      filteredLogs = filteredLogs.filter(log => new Date(log.timestamp) >= startDate);
+    }
+    if (endDate) {
+      const endFilterDate = new Date(endDate);
+    endFilterDate.setHours(23, 59, 59, 999);
+      filteredLogs = filteredLogs.filter(log => new Date(log.timestamp) <= endFilterDate);
+    }
+    setData(filteredLogs);
+    
+  }, [selectedOwner, startDate, endDate])
+  
 
   const handleOwnerChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedOwner(event.target.value);

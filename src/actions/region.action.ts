@@ -58,15 +58,30 @@ export const getRegionsForSensorId = async (Sensor_ID:string) => {
   }
 }
 // get all sensors of a region
+export const getRegionsensors1 = async (regionName: string) => {
+  try {
+    await connectToDB();
+    
+    // Query SensorRegionWeight and populate the related Sensor's Tagname
+    const results = await SensorRegionWeight.find({regionName}).populate('sensor', 'Tagname').exec();
+    
+
+    return JSON.stringify(results);
+  } catch (error) {
+    console.log(error);
+
+  }
+}
 export const getRegionsensors = async (regionName: string) => {
   try {
     await connectToDB();
     
     // Query SensorRegionWeight and populate the related Sensor's Tagname
-    const results = await SensorRegionWeight.find({regionName},{_id:0,id:0,workingStatus:0,weight:0,__v:0}).populate('sensor', 'Tagname').exec();
+    const results = await SensorRegionWeight.find({regionName}).populate('sensor', 'Tagname').exec();
     const transformedResults = results.map((result) => ({
       Sensor_ID: result.Sensor_ID,
       Tagname: result.sensor.Tagname,
+      weight:result.weight
     }));
 
     return JSON.stringify(transformedResults);

@@ -1,5 +1,6 @@
 "use server"
 
+import { metadata } from "@/app/layout";
 import { auth } from "@/auth";
 import { ISensor } from "@/lib/interfaces/sensor";
 import { logger } from "@/lib/logger";
@@ -120,7 +121,7 @@ export const addSensorToRegions = async (selectedregions: Iselectedregions) => {
             // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
             logger.warn(`SensorRegionWeight id: ${_id} not found for update workingstatus.`)
           } else {
-            logger.info(`Updated workingstatus changed true for ${data.Sensor_ID} in region: ${data.regionName} by ${user?.email}`);
+            logger.info(`Updated workingstatus changed true for ${data.Sensor_ID} in region: ${data.regionName} `,{ metadata: { owner: user?.email } });
 
           }
         } catch (error) {
@@ -171,7 +172,7 @@ export const deleteSensorFromRegions = async (selectedregions: Iselectedregions)
             // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
             logger.warn(`SensorRegionWeight id: ${_id} not found for update workingstatus.`)
           } else {
-            logger.info(`Updated workingstatus changed to false for ${data.Sensor_ID} in region: ${data.regionName} by ${user?.email}`,{owner:user?.email});
+            logger.info(`Updated workingstatus changed to false for ${data.Sensor_ID} in region: ${data.regionName} `,{ metadata: { owner: user?.email } });
 
           }
         } catch (error) {
@@ -204,6 +205,8 @@ export interface SensorWeights {
 }
 export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
   try {
+    const session = await auth();
+    const user = session?.user;
     await connectToDB(); // Connect to database
 
     for (const [_id, { weight }] of Object.entries(sensorWeights)) {
@@ -219,9 +222,9 @@ export const modifyWeightOfSensors = async (sensorWeights: SensorWeights) => {
 
         if (!sensor) {
           // console.warn(`Sensor with Tagnames: ${Tagnames} not found for update.`);
-          logger.warn(`Sensor with Tagnames: ${_id} not found for update.`)
+          logger.warn(`Sensor with Tagnames: ${_id} not found for update.`,{ metadata: { owner: user?.email } })
         } else {
-          logger.info(`Updated sensor weight for: ${_id} :${weight}`);
+          logger.info(`Updated sensor weight for: ${_id} :${weight}`,{ metadata: { owner: user?.email } });
 
         }
       } catch (error) {
@@ -254,6 +257,8 @@ interface Iaddsensor {
 }
 export const addnewsensor = async (data: Iaddsensor) => {
   try {
+    const session = await auth();
+    const user = session?.user;
     await connectToDB();
     const sensor = new Sensor({
       Sensor_ID: data.Sensor_ID,
@@ -265,6 +270,7 @@ export const addnewsensor = async (data: Iaddsensor) => {
         message: "signal  already present"
       }
     }
+    logger.info(`Sensor with id: ${data.Sensor_ID} add to database  successfulllly `,{ metadata: { owner: user?.email } })
     for (const entrie of data.entries) {
       const sensorregion = new SensorRegionWeight({
         Sensor_ID: data.Sensor_ID,
@@ -274,9 +280,9 @@ export const addnewsensor = async (data: Iaddsensor) => {
       });
       try {
         await sensorregion.save();
-        logger.info(`${data.Sensor_ID} added to region: ${entrie.regionName} successfully`)
+        logger.info(`${data.Sensor_ID} added to region: ${entrie.regionName} successfully`,{ metadata: { owner: user?.email } })
       } catch (error) {
-        logger.error(`${data.Sensor_ID} added to region: ${entrie.regionName}  was unable to add `)
+        logger.error(`${data.Sensor_ID} added to region: ${entrie.regionName}  was unable to add `,{ metadata: { owner: user?.email } })
       }
     }
     return {

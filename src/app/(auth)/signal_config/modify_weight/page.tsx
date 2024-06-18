@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getRegionsensors, getallregions } from "@/actions/region.action";
+import { getRegionsensors, getRegionsensors1, getallregions } from "@/actions/region.action";
 
 import { regionsname, sensorsTagnames } from "@/constants";
 
@@ -66,7 +66,7 @@ const ComboboxDemo = () => {
   React.useEffect(() => {
     // console.log(regionsensors);
     const fun = async () => {
-      await getRegionsensors(value).then((res) => {
+      await getRegionsensors1(value).then((res) => {
         // console.log(res);
         if (res) {
           const data = JSON.parse(res);
@@ -156,7 +156,7 @@ const ComboboxDemo = () => {
               <tr key={sensor._id} className="border-b border-gray-800">
                 <td className="px-4 py-2">{index + 1}</td>
                 <td className="px-4 py-2">{sensor.sensor?.Tagname}</td>
-                <td className="px-4 py-2">{sensor.weight.toString()}</td>
+                <td className="px-4 py-2">{sensor.weight}</td>
                 <td className="px-4 py-2">
                   <select
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -190,7 +190,7 @@ const ComboboxDemo = () => {
                 toast({
                   description: res.message,
                 });
-                await getRegionsensors(value).then((res) => {
+                await getRegionsensors1(value).then((res) => {
                   // console.log(res);
                   if (res) {
                     const data = JSON.parse(res);

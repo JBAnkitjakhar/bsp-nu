@@ -1,4 +1,6 @@
 "use server"
+import { ILog, Log } from '@/lib/models/log.model';
+import connectToDB from '@/lib/mongoose';
 import fs from 'fs/promises';
 
 export const getlogs = async () => {
@@ -19,3 +21,43 @@ export const getlogs = async () => {
         throw new Error('Error reading log file');
     }
 }
+interface arguments{
+    owner: string, startDate?: Date, endDate?: Date
+}
+export const  fetchLogs=async({owner, startDate, endDate}:arguments)=>{
+    try {
+      await connectToDB();
+  
+      // Create a query object
+      const query: any = {};
+  
+      // Add owner to the query if it's not 'all'
+      if (owner !== 'all') {
+        query['metadata.owner'] = owner;
+      }
+  
+      // Add date range to the query
+      if (startDate && endDate) {
+        query.timestamp = {
+          $gte: startDate,
+          $lt: endDate,
+        };
+      } else if (startDate) {
+        query.timestamp = {
+          $gte: startDate,
+        };
+      } else if (endDate) {
+        query.timestamp = {
+          $lt: endDate,
+        };
+      }
+  
+      // Fetch the logs
+      const logs: ILog[] = await Log.find(query).exec();
+      console.log(logs);
+      
+      return JSON.stringify(logs);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    } 
+  }
