@@ -34,7 +34,7 @@ const Navbar = async () => {
         <Link href="/dashboard" 
            className="text-white transition-colors hover:text-dc3  hover:bg-dc2 rounded-lg px-3 py-2 m-1">
             Dashboard
-        </Link>}
+        </Link>
         {userRole==="Power"&&<Link href="/signal_config"
            className="text-white transition-colors hover:text-dc3  hover:bg-dc2 rounded-lg px-3 py-2 m-1">
             Signal-Config

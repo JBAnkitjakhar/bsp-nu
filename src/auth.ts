@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import connectToDB from "@/lib/mongoose";
 import { User } from "@/lib/models/user.model";
 import { authConfig } from "./auth.config";
+import { logger } from "./lib/logger";
 declare module "next-auth" {
     interface Session {
       user: {
