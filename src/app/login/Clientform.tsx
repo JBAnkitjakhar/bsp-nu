@@ -2,25 +2,35 @@
 import { signInWithCreds } from "@/actions/user.actions";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import {
-  EmailOutlined,
-  LockOutlined,
-} from "@mui/icons-material";
+import { EmailOutlined, LockOutlined } from "@mui/icons-material";
 import React from "react";
- 
 
 const Clientform = () => {
   const { toast } = useToast();
   const router = useRouter();
   return (
     <div className="w-full h-lvh flex flex-row items-center justify-center">
-      <div className="w-1/3 py-7 px-4 max-sm:w-5/6 max-lg:w-2/3 max-xl:w-1/2 flex flex-col 
-      items-center justify-center gap-6 bg-white rounded-3xl">
+      <div
+        className="w-1/3 py-7 px-4 max-sm:w-5/6 max-lg:w-2/3 max-xl:w-1/2 flex flex-col 
+  items-center justify-center gap-6 bg-white rounded-3xl"
+      >
+        <p className="text-bold">BHILAI STEEL PLANT</p>
+        <div className="flex flex-row justify-center items-center w-full">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Steel_Authority_of_India_logo.svg/220px-Steel_Authority_of_India_logo.svg.png"
+            alt="logo"
+            style={{ width: "35%", marginRight: "5%" }}
+          />
+          <img
+            src="https://upload.wikimedia.org/wikipedia/en/6/61/IIT_Bhilai_logo.png"
+            alt="iit bhilai logo"
+            style={{ width: "30%" }}
+          />
+        </div>
 
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Steel_Authority_of_India_logo.svg/220px-Steel_Authority_of_India_logo.svg.png" alt="logo" className="w-52 h-auto" />
-          
-          <p className="text-bold">BHILAI STEEL PLANT</p>
-        <form className="flex flex-col items-center gap-5"
+        {/* <p className="text-bold">BHILAI STEEL PLANT</p> */}
+        <form
+          className="flex flex-col items-center gap-5"
           action={async (formdata) => {
             const email = formdata.get("email") as string;
             const password = formdata.get("password") as string;
@@ -62,18 +72,23 @@ const Clientform = () => {
               <input
                 name="password"
                 placeholder=" Password"
-           type="password"
-                 className="w-[300px] max-sm:w-full bg-transparent outline-none"
+                type="password"
+                className="w-[300px] max-sm:w-full bg-transparent outline-none"
               />
-                <LockOutlined sx={{ color: "#737373" }} />
+              <LockOutlined sx={{ color: "#737373" }} />
             </div>
-             </div>
+          </div>
 
-              <button className=" w-full px-5 py-3 mt-5 mb-7 rounded-xl cursor-pointer bg-blue-1 hover:bg-red-1 text-white text-body-bold text-bold " type="submit">Login</button>
-         
+          <button
+            className=" w-full px-5 py-3 mt-5 mb-7 rounded-xl cursor-pointer bg-blue-1 hover:bg-red-1 text-white text-body-bold text-bold "
+            type="submit"
+          >
+            Login
+          </button>
         </form>
 
         {/* <h2 className="text-center">BSP</h2> */}
+      {/* <p className="text-bold">BHILAI STEEL PLANT</p> */}
       </div>
     </div>
   );

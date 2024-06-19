@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* src/styles/globals.css */
+.bg-custom {
+  background-image: url('/bspbackground.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
